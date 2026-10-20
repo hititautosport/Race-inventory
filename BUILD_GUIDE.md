@@ -147,7 +147,7 @@ Speed is the top requirement. Any change must keep these behaviors:
 
 - **Scan** (red button in the header, every user level): opens the camera, reads a QR label and jumps to that item. Also has a box to type a code. Closing it turns the camera off. iPhone asks for camera permission the first time.
 - **Labels** button: makes one PDF of QR labels for exactly the items currently showing (search or filter first, e.g. "Suspension" or "Rack B"). Two formats: **Label printer** (one 3.5 × 1.5 in label per page) or **Letter sheets** (Avery 5163/8163, 2 × 4 in, 10 per page). The choice is remembered.
-- Grouped by category, searchable by part, size, code or bin, filterable by location.
+- Grouped by category, searchable by part, size, code or bin, filterable by location. Category headings are large (24px, white, total in red); part names are smaller (14px) so categories stand out while scrolling.
 - Tap an item: code, QR, qty per location, photo, home bin (editable), full history with delete, **Count more**, **Move** (Editor+: from/to location with on-hand counts, how many, blocks moving more than is there; saved as two linked `transfer` rows, −qty at From and +qty at To, sharing a `transfer_id`; Undo or deleting either row removes both), **Save QR label** (PNG, 1050×450, sized for 3.5×1.5 in labels), **Delete item** (two taps; removes the item and its entries from inventory, keeps the part name in the list).
 - Exports and label printing are in the **Menu** (section 5a).
 
@@ -237,6 +237,7 @@ The code is `index.html` in the `hititautosport/Race-inventory` GitHub repo; thi
 
 ## 11. Changelog
 
+- **2026-10-19** — Stock list: category headings bigger and brighter, part names smaller.
 - **2026-10-19** — v2.4: home-screen app status bar switched to solid black to remove the dead strip under Enter; screen report added under the version in the Menu.
 - **2026-10-19** — Count screen simplified: Just counted list moved to Menu → Recent entries (last 25, with Undo); Location and Bin / shelf moved to the bottom. 57/57 checks passed.
 - **2026-10-19** — Fixed iPhone layout: no dead space above the header, nothing scrolls behind it, smaller gap under Enter.

@@ -180,7 +180,11 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
 .pend{color:var(--muted);font-style:italic}
 .empty{padding:22px 16px;color:var(--muted);text-align:center;font-size:14px}
 .empty strong{display:block;color:var(--ink);font-size:15px;margin-bottom:4px}
-.grp{font:700 15px/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:16px 2px 6px;display:flex;justify-content:space-between}
+/* Stock list: category headers big and bright, part names smaller, so categories stand out when scrolling */
+.grp{font:700 24px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);padding:22px 2px 8px;display:flex;justify-content:space-between;align-items:baseline}
+.grp span:last-child{color:var(--accent);font-size:20px}
+#stock .row .t{font-size:14px;font-weight:600}
+#stock .row .q{font-size:20px}
 
 /* stock toolbar */
 .tools{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px}
