@@ -916,7 +916,8 @@ renderAll(); syncUI();
 
 /* ---------- Supabase connection ---------- */
 const SB_URL = "https://osbjpkhxerztakdqdyql.supabase.co";
-const SB_KEY = "sb_publishable_n8WaICi5F2t4cLCTBmgtMA_8AdahHoL"; // publishable key: safe to ship, data is protected by sign-in + row level security
+// public "anon" key: safe to ship in the page; data is protected by sign-in + row level security
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zYmpwa2h4ZXJ6dGFrZHFkeXFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0NDM4NTEsImV4cCI6MjEwODAxOTg1MX0.Oqoxce8m96Y_6s0E3NqKYI9FQ8sfWmzq2EQFMX9b-vE";
 const TABLES = ["categories","parts","sizes","items","moves","locations"];
 const LEVELS = { disabled:"No access", viewer:"View only", editor:"Editor", admin:"Master admin" };
 const sb = window.supabase ? window.supabase.createClient(SB_URL, SB_KEY, { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:false, storageKey:"race-inv-auth" } }) : null;
