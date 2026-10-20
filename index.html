@@ -356,6 +356,54 @@ body.qe main{padding-bottom:110px}
 .fmt button b{font-size:16px}
 .fmt button span{font-size:13px;color:var(--muted)}
 .fmt button[aria-pressed="true"]{border-color:var(--cobalt);background:color-mix(in srgb,var(--cobalt) 12%,var(--surface))}
+
+/* Master admin bottom bar + its pages. Crew never sees these. */
+.tabs[hidden]{display:none}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:26;display:none;background:var(--surface);border-top:1px solid var(--line);padding-top:4px;padding-bottom:max(4px, calc(env(safe-area-inset-bottom,0px) - 12px))}
+body.navon .nav{display:block}
+.nav .wrap{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+.nav button{position:relative;display:grid;justify-items:center;gap:3px;border:0;background:transparent;padding:6px 0 4px;color:var(--muted);font:600 11px/1 var(--f-body);letter-spacing:.02em;border-radius:10px;min-width:0}
+.nav button svg{width:24px;height:24px}
+.nav button[aria-current="page"]{color:var(--accent)}
+.nav button[aria-current="page"] span{font-weight:700}
+.nav .nb{position:absolute;top:0;left:calc(50% + 5px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--accent);color:#fff;font:700 11px/18px var(--f-body);text-align:center}
+body.navon .enterbar,body.navon .qebar{bottom:var(--navh,58px);padding-bottom:10px}
+body.navon main{padding-bottom:calc(120px + var(--navh,58px))}
+body.navon .toast{bottom:calc(var(--navh,58px) + 88px)}
+.pghd{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:2px 2px 12px}
+.pghd h2{margin:0;font:700 28px/1 var(--f-display);letter-spacing:.06em;color:var(--ink)}
+.pghd small{color:var(--muted);font-size:13px;white-space:nowrap}
+.sec{margin:22px 2px 8px;font:600 11px/1.2 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{display:grid;gap:5px;align-content:start;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:var(--shadow);min-width:0}
+.tile span{font:600 10.5px/1.2 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.tile b{font:700 30px/1 var(--f-display);font-variant-numeric:tabular-nums;color:var(--ink);overflow-wrap:anywhere}
+.tile small{font-size:12.5px;color:var(--muted);line-height:1.3}
+.tile.hot{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 22%,transparent),var(--shadow)}
+.tile.hot b{color:var(--accent)}
+.day{font:600 11px/1.2 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:10px 14px 4px;background:var(--sunk);border-bottom:1px solid var(--line)}
+.byi{display:inline-grid;place-items:center;min-width:26px;height:20px;padding:0 5px;border-radius:6px;background:var(--sunk);border:1px solid var(--line);font:700 10.5px/1 var(--f-mono);color:var(--ink)}
+.pgstack{display:grid;gap:8px}
+.need{font:700 22px/1 var(--f-display);color:var(--accent);text-align:right}
+.need small{display:block;font:500 11px/1.2 var(--f-body);color:var(--muted);letter-spacing:.04em}
+.rv{display:grid;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.rv:last-child{border-bottom:0}
+.rv .r1{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rv .kind{font:700 10.5px/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.rv .m{font-size:12.5px;color:var(--muted)}
+.rv .r2{display:grid;grid-template-columns:1fr auto;gap:8px}
+.rv input{min-width:0;height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:0 12px;font-weight:600;color:var(--ink)}
+.rv .acts{display:flex;flex-wrap:wrap;gap:6px}
+.btn.sm{height:36px;padding:0 12px;font-size:13.5px}
+.btn.ok{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);min-width:64px}
+.soon{border:1.5px dashed var(--line);border-radius:16px;padding:16px;color:var(--muted);font-size:14px;margin-top:14px}
+.soon b{display:block;color:var(--ink);font:700 18px/1.1 var(--f-display);letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.exptag{font:700 10.5px/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:#fff;background:#C47F12;border-radius:999px;padding:4px 7px}
+.exptag.gone{background:var(--bad)}
+.segp{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.segp.three{grid-template-columns:repeat(3,1fr)}
+.segp button{height:40px;border:1.5px solid var(--line);background:var(--sunk);border-radius:12px;font-weight:600;font-size:14px;min-width:0;padding:0 6px}
+.segp button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
 </style>
 </head>
 <body>
@@ -415,12 +463,18 @@ body.qe main{padding-bottom:110px}
     <div class="tools">
       <label class="search" for="q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg><input id="q" placeholder="Search part, size, code, bin" autocomplete="off"></label>
       <button class="btn" id="b-labels" type="button">Labels</button>
-      <button class="btn need-edit" id="b-qe" type="button">Edit</button>
+      <button class="btn need-admin" id="b-qe" type="button">Edit</button>
     </div>
     <div class="seg" id="locf"></div>
     <div class="sum" id="sum"></div>
     <div id="stock"></div>
   </section>
+
+  <!-- Master admin pages (bottom bar). Filled in by renderPage(). -->
+  <section id="v-overview" hidden></section>
+  <section id="v-cars" hidden></section>
+  <section id="v-lists" hidden></section>
+  <section id="v-admin" hidden></section>
 </main>
 
 <div class="qebar" id="qebar" hidden><div class="wrap"><button class="btn" id="qe-cancel" type="button" style="height:52px">Cancel</button><button class="go" id="qe-save" type="button" disabled>No changes yet</button></div></div>
@@ -436,6 +490,14 @@ body.qe main{padding-bottom:110px}
     <button class="enter" id="enter" type="button" disabled>Enter<small id="enter-s">Pick a category and part</small></button>
     <button class="camgo" id="cam-go" type="button" disabled aria-label="Take a photo and save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>With photo</span></button>
   </div></div></div>
+
+<nav class="nav" id="nav" aria-label="Admin pages"><div class="wrap">
+  <button type="button" data-pg="inv" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="m3 7.5 9 4.5 9-4.5M12 12v9"/></svg><span>Inventory</span></button>
+  <button type="button" data-pg="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 20v-6M12 20V5M19 20v-10M3 20h18"/></svg><span>Overview</span></button>
+  <button type="button" data-pg="cars"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 16.5V14l2.5-4.5h9l4.5 4 3 .8v2.2h-2"/><path d="M8.6 16.5h6.8M4.5 16.5h-2"/><circle cx="6.5" cy="16.8" r="2.1"/><circle cx="17.5" cy="16.8" r="2.1"/></svg><span>Cars</span><b class="nb" id="nb-cars" hidden></b></button>
+  <button type="button" data-pg="lists"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h10M10 12h10M10 18h10"/><path d="m3.5 6 1.5 1.5L7.5 5M3.5 12l1.5 1.5L7.5 11M3.5 18l1.5 1.5L7.5 17"/></svg><span>Lists</span><b class="nb" id="nb-lists" hidden></b></button>
+  <button type="button" data-pg="admin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.8-3.4 8-8 9-4.6-1-8-4.2-8-9V6z"/><path d="m8.8 12 2.2 2.2 4.2-4.4"/></svg><span>Admin</span><b class="nb" id="nb-admin" hidden></b></button>
+</div></nav>
 
 <div class="scrim" id="scrim" hidden></div>
 <div class="toast" id="toast" hidden></div>
@@ -459,7 +521,7 @@ const S = {
   sel:{ cat: store.get("cat"), part:null, size:null, loc: store.get("loc") },
   bin: store.get("bin") || "",
   photo:null, // {id,url,uploading}
-  tab:"count", q:"", locFilter:"all",
+  tab:"count", page:"inv", q:"", locFilter:"all",
   inflight:0, failed:0,
   pendingItems:new Map(), deleting:new Set(),
 };
@@ -540,6 +602,7 @@ function keypadUI(){
     $("#kp-what").textContent = p ? p.name + (z ? " · " + z.name : "") : "Quantity";
     requestAnimationFrame(() => { $("main").style.paddingBottom = ($("#enterbar").offsetHeight + 24) + "px"; });
   } else $("main").style.paddingBottom = "";
+  navUI();
 }
 function closePad(){ if (!S.qtyActive) return; S.qtyActive = false; keypadUI(); }
 function renderForm(){
@@ -948,9 +1011,9 @@ function openItem(id){
     <div class="det">
       <div class="top"><dl class="kv"><dt>Code</dt><dd><span class="code" style="font-size:14px">${esc(it.code)}</span></dd>${locRows}</dl><div class="qr" id="it-qr" aria-label="QR code for ${esc(it.code)}"></div></div>
       ${it.photo ? `<img class="photo" data-photo="${esc(it.photo)}" alt="Photo of ${esc(itemTitle(it))}">` : ""}
-      <div class="need-edit" style="display:flex;gap:8px;margin:12px 0 -6px;font:600 11px/1.2 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)"><span style="flex:1">Home bin / shelf</span><span style="width:120px">Keep at least</span><span style="width:64px"></span></div>
-      <div class="binedit need-edit"><input id="it-bin" value="${esc(it.bin || "")}" placeholder="Home bin / shelf" aria-label="Home bin"><input id="it-min" value="${it.min_qty != null ? esc(it.min_qty) : ""}" placeholder="Keep at least" aria-label="Keep at least (low stock number)" inputmode="numeric" pattern="[0-9]*" style="max-width:120px"><button class="btn" id="it-binsave" type="button">Save</button></div>
-      <div class="actions"><button class="btn primary need-edit" id="it-count" type="button">Count more</button><button class="btn need-edit" id="it-move" type="button">Move</button><button class="btn need-edit" id="it-use" type="button">Used / Damaged</button><button class="btn need-edit" id="it-fix" type="button">Fix</button><button class="btn" id="it-label" type="button">Save QR label</button><button class="btn danger need-admin" id="it-del" type="button">Delete item</button></div>
+      <div class="need-edit" style="display:flex;gap:8px;margin:12px 0 -6px;font:600 11px/1.2 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)"><span style="flex:1">Home bin / shelf</span><span class="need-admin" style="width:120px">Keep at least</span><span style="width:64px"></span></div>
+      <div class="binedit need-edit"><input id="it-bin" value="${esc(it.bin || "")}" placeholder="Home bin / shelf" aria-label="Home bin"><input id="it-min" class="need-admin" value="${it.min_qty != null ? esc(it.min_qty) : ""}" placeholder="Keep at least" aria-label="Keep at least (low stock number)" inputmode="numeric" pattern="[0-9]*" style="max-width:120px"><button class="btn" id="it-binsave" type="button">Save</button></div>
+      <div class="actions"><button class="btn primary need-edit" id="it-count" type="button">Count more</button><button class="btn need-edit" id="it-move" type="button">Move</button><button class="btn need-edit" id="it-use" type="button">Used / Damaged</button><button class="btn need-admin" id="it-fix" type="button">Fix</button><button class="btn" id="it-label" type="button">Save QR label</button><button class="btn danger need-admin" id="it-del" type="button">Delete item</button></div>
       <div class="why" id="it-delwhy" hidden style="margin-top:8px;font-size:13px;color:var(--bad);font-weight:600"></div>
       <div class="movebox" id="it-movebox" hidden>
         <div class="mvrow"><label class="fld"><span class="lbl2">From</span><select id="mv-from"></select></label><span class="arrow">→</span><label class="fld"><span class="lbl2">To</span><select id="mv-to"></select></label></div>
@@ -1113,7 +1176,7 @@ function undoUnit(id){
 function unitListHtml(itemId){
   const us = unitsOf(itemId);
   if (!us.length) return `<div class="empty">No units yet. Use <b>Add unit</b> and type each serial number.</div>`;
-  return us.map(u => { const st = unitStats(u); return `<button class="row" type="button" data-unit="${esc(u.id)}"><div><div class="t">#${esc(u.serial)}</div><div class="m"><span class="ustat ${esc(u.status)}">${esc(UNIT_STATUS[u.status] || u.status)}</span><span>${esc(locName(u.location_id))}</span><span>${esc(sinceText(st))} since rebuild</span>${st.due ? '<span class="duetag">Due</span>' : ""}</div></div><span class="code">${esc(u.code)}</span></button>`; }).join("");
+  return us.map(u => { const st = unitStats(u); return `<button class="row" type="button" data-unit="${esc(u.id)}"><div><div class="t">#${esc(u.serial)}</div><div class="m"><span class="ustat ${esc(u.status)}">${esc(UNIT_STATUS[u.status] || u.status)}</span><span>${esc(locName(u.location_id))}</span><span>${esc(sinceText(st))} since rebuild</span>${st.due ? '<span class="duetag">Due</span>' : ""}${expTag(u)}</div></div><span class="code">${esc(u.code)}</span></button>`; }).join("");
 }
 function openUnit(id, panel){
   const u = find(S.units, id); if (!u) return;
@@ -1125,7 +1188,7 @@ function openUnit(id, panel){
   sc.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="un-t">
     <div class="sh-hd"><h3 id="un-t">#${esc(u.serial)}<small>${esc(itemTitle(it))} · ${esc(u.code)}</small></h3><button class="iconbtn" id="un-back" type="button">Back</button><button class="iconbtn" id="un-x" type="button">Close</button></div>
     <div class="det">
-      <div class="top"><dl class="kv"><dt>Status</dt><dd><span class="ustat ${esc(u.status)}">${esc(UNIT_STATUS[u.status])}</span> ${st.due ? '<span class="duetag">Due</span>' : ""}</dd><dt>Location</dt><dd>${esc(locName(u.location_id))}</dd>${u.builder ? `<dt>Builder</dt><dd>${esc(u.builder)}</dd>` : ""}<dt>Last rebuild</dt><dd>${st.lastRebuild ? esc(new Date(st.lastRebuild.ts || st.lastRebuild.at).toLocaleDateString([], { month:"short", day:"numeric", year:"numeric" })) : "—"}</dd></dl><div class="qr" id="un-qr" aria-label="QR code for ${esc(u.code)}"></div></div>
+      <div class="top"><dl class="kv"><dt>Status</dt><dd><span class="ustat ${esc(u.status)}">${esc(UNIT_STATUS[u.status])}</span> ${st.due ? '<span class="duetag">Due</span>' : ""}</dd><dt>Location</dt><dd>${esc(locName(u.location_id))}</dd>${u.builder ? `<dt>Builder</dt><dd>${esc(u.builder)}</dd>` : ""}<dt>Last rebuild</dt><dd>${st.lastRebuild ? esc(new Date(st.lastRebuild.ts || st.lastRebuild.at).toLocaleDateString([], { month:"short", day:"numeric", year:"numeric" })) : "—"}</dd>${u.expires ? `<dt>Expires</dt><dd>${esc(fmtDay(u.expires))} ${expTag(u)}</dd>` : ""}</dl><div class="qr" id="un-qr" aria-label="QR code for ${esc(u.code)}"></div></div>
       <div class="ugrid">
         <div class="ubox"><span>Since rebuild</span><b>${st.hSince ? num1(st.hSince) + " h" : "—"}</b><small>${st.lSince ? st.lSince + " laps" : "no laps"}</small></div>
         <div class="ubox"><span>Lifetime</span><b>${st.hAll ? num1(st.hAll) + " h" : "—"}</b><small>${st.lAll ? st.lAll + " laps" : "no laps"}</small></div>
@@ -1146,6 +1209,7 @@ function openUnit(id, panel){
         <div class="lgrid" style="grid-template-columns:1fr 1fr"><label class="ufld"><span>Serial #</span><input id="ue-serial" value="${esc(u.serial)}" autocapitalize="characters" autocomplete="off"></label><label class="ufld"><span>Builder</span><input id="ue-builder" value="${esc(u.builder || "")}" autocomplete="off"></label></div>
         <div class="lgrid" style="grid-template-columns:1fr 1fr"><label class="ufld"><span>Status</span><select id="ue-status">${Object.entries(UNIT_STATUS).map(([k, v]) => `<option value="${k}" ${u.status === k ? "selected" : ""}>${v}</option>`).join("")}</select></label><label class="ufld"><span>Location</span><select id="ue-loc">${locs.map(l => `<option value="${esc(l.id)}" ${l.id === u.location_id ? "selected" : ""}>${esc(l.name)}</option>`).join("")}</select></label></div>
         <div class="lgrid" style="grid-template-columns:1fr 1fr"><label class="ufld"><span>Rebuild every (hours)</span><input id="ue-rh" inputmode="decimal" value="${u.rebuild_hours ?? ""}" placeholder="optional"></label><label class="ufld"><span>Rebuild every (laps)</span><input id="ue-rl" inputmode="numeric" pattern="[0-9]*" value="${u.rebuild_laps ?? ""}" placeholder="optional"></label></div>
+        <label class="ufld"><span>Expires (belts, seat, fire system, nets)</span><input id="ue-exp" type="date" value="${esc(u.expires || "")}"></label>
         <label class="ufld"><span>Notes</span><textarea id="ue-notes">${esc(u.notes || "")}</textarea></label>
         <button class="go" id="ue-go" type="button">Save details</button><div class="err" id="ue-err"></div>
       </div>
@@ -1193,7 +1257,9 @@ function openUnit(id, panel){
     if (S.units.some(x => x.id !== id && x.item_id === u.item_id && norm(x.serial) === norm(serial))) { err.textContent = "Another unit already has that serial."; return; }
     if (rh && !/^\d+(\.\d)?$/.test(rh)) { err.textContent = "Rebuild hours: a number like 25 or 25.5."; return; }
     if (rl && !/^\d+$/.test(rl)) { err.textContent = "Rebuild laps: a whole number."; return; }
-    write(() => S.db.doc("units/" + id).update({ serial, builder:$("#ue-builder").value.trim(), status:$("#ue-status").value, location_id:$("#ue-loc").value, rebuild_hours: rh === "" ? null : Number(rh), rebuild_laps: rl === "" ? null : parseInt(rl, 10), notes:$("#ue-notes").value.trim() }), "the unit");
+    const patch = { serial, builder:$("#ue-builder").value.trim(), status:$("#ue-status").value, location_id:$("#ue-loc").value, rebuild_hours: rh === "" ? null : Number(rh), rebuild_laps: rl === "" ? null : parseInt(rl, 10), expires: $("#ue-exp").value || null, notes:$("#ue-notes").value.trim() };
+    const cur = find(S.units, id); if (cur) Object.assign(cur, patch); // show it right away; the save catches up
+    write(() => S.db.doc("units/" + id).update(patch), "the unit");
     toast("Saved"); openUnit(id);
   };
   $("#un-label").onclick = () => saveLabel(it, { code:u.code, line2:"SN " + u.serial });
@@ -1213,17 +1279,17 @@ function openUnit(id, panel){
 function openByCode(raw){
   const code = String(raw || "").trim().toUpperCase();
   const it = S.items.find(i => i.code === code);
-  if (it) { closePicker(); setTab("stock"); openItem(it.id); return true; }
+  if (it) { closePicker(); if (S.page === "inv") setTab("stock"); openItem(it.id); return true; }
   const u = S.units.find(x => String(x.code).toUpperCase() === code);
-  if (u) { closePicker(); setTab("stock"); openUnit(u.id); return true; }
+  if (u) { closePicker(); if (S.page === "inv") setTab("stock"); openUnit(u.id); return true; }
   return false;
 }
 function unitsCsv(kind){
   const rows = [];
   const units = S.units.slice().sort((a,b) => (catName((find(S.items, a.item_id) || {}).category_id) + a.serial).localeCompare(catName((find(S.items, b.item_id) || {}).category_id) + b.serial, undefined, { numeric:true }));
   if (kind === "units") {
-    rows.push(["Code","Category","Part","Size","Serial","Status","Location","Builder","Hours since rebuild","Laps since rebuild","Lifetime hours","Lifetime laps","Last rebuild","Rebuild every (hours)","Rebuild every (laps)","Due","Notes"]);
-    for (const u of units) { const it = find(S.items, u.item_id) || {}, st = unitStats(u); rows.push([u.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), u.serial, UNIT_STATUS[u.status], locName(u.location_id), u.builder || "", num1(st.hSince), st.lSince, num1(st.hAll), st.lAll, st.lastRebuild ? stamp(st.lastRebuild) : "", u.rebuild_hours ?? "", u.rebuild_laps ?? "", st.due ? "DUE" : "", u.notes || ""]); }
+    rows.push(["Code","Category","Part","Size","Serial","Status","Location","Builder","Hours since rebuild","Laps since rebuild","Lifetime hours","Lifetime laps","Last rebuild","Rebuild every (hours)","Rebuild every (laps)","Due","Expires","Notes"]);
+    for (const u of units) { const it = find(S.items, u.item_id) || {}, st = unitStats(u); rows.push([u.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), u.serial, UNIT_STATUS[u.status], locName(u.location_id), u.builder || "", num1(st.hSince), st.lSince, num1(st.hAll), st.lAll, st.lastRebuild ? stamp(st.lastRebuild) : "", u.rebuild_hours ?? "", u.rebuild_laps ?? "", st.due ? "DUE" : "", u.expires || "", u.notes || ""]); }
   } else {
     rows.push(["Date","Code","Category","Part","Serial","Entry","Hours","Laps","Note","Files","By","By name"]);
     for (const l of S.ulog.slice().sort((a,b) => (a.ts||0) - (b.ts||0))) { const u = find(S.units, l.unit_id) || {}, it = find(S.items, u.item_id) || {}; rows.push([stamp(l), u.code, catName(it.category_id), partName(it.part_id), u.serial, LOG_TYPES[l.type] || l.type, l.hours ?? "", l.laps ?? "", l.note || "", (l.files || []).map(f => f.name).join("; "), initialsOf(l.by), nameOf(l.by)]); }
@@ -1336,13 +1402,12 @@ function openDups(){
   const groups = dupGroups();
   const pieces = pid => S.items.filter(i => i.part_id === pid).reduce((a, i) => a + itemTotal(tt.get(i.id)), 0);
   sc.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="dp-t">
-    <div class="sh-hd"><h3 id="dp-t">Duplicate parts<small>${groups.length ? plural(groups.length, "possible duplicate") : "None found"}</small></h3><button class="iconbtn" id="dp-back" type="button">Menu</button><button class="iconbtn" id="dp-x" type="button">Close</button></div>
+    <div class="sh-hd"><h3 id="dp-t">Duplicate parts<small>${groups.length ? plural(groups.length, "possible duplicate") : "None found"}</small></h3><button class="iconbtn" id="dp-x" type="button">Close</button></div>
     <div class="det">
       ${groups.length ? `<p class="hint" style="padding:10px 0 0">Same or similar part names, in any category. Tap <b>Keep</b> on the right one and the others merge into it: their items, counts and history move over.</p>` : `<p class="hint" style="padding:12px 0">No duplicate part names. Nice and clean.</p>`}
       ${groups.map((g, gi) => `<div class="dupg">${g.map(p => `<div class="dupp"><div><b>${esc(p.name)}</b><small>${esc(catName(p.category_id))} · ${plural(S.items.filter(i => i.part_id === p.id).length, "item")} · ${pieces(p.id)} pieces</small></div><button class="btn" type="button" data-keep="${esc(p.id)}" data-g="${gi}">Keep</button></div>`).join("")}<div class="err" data-gerr="${gi}"></div></div>`).join("")}
     </div></div>`;
   $("#dp-x").onclick = closePicker;
-  $("#dp-back").onclick = openAccount;
   sc.querySelectorAll("[data-keep]").forEach(b => b.onclick = async () => {
     const g = groups[+b.dataset.g], keep = find(S.parts, b.dataset.keep), others = g.filter(p => p.id !== keep.id);
     if (!b.dataset.armed) {
@@ -1632,17 +1697,299 @@ async function makeLabelPdf(list, fmt){
   }
 }
 
+/* ---------- Master admin pages (bottom bar) ---------- */
+const PAGES = ["overview", "cars", "lists", "admin"];
+S.typing = false; S.carsF = "active"; S.listTab = "supply";
+const isAdminUser = () => S.role === "admin";
+const fmtDay = v => { const d = new Date(String(v).length <= 10 ? v + "T12:00:00" : v); return isNaN(d) ? String(v) : d.toLocaleDateString([], { month:"short", day:"numeric", year:"numeric" }); };
+const daysTo = v => (new Date(v + "T12:00:00") - Date.now()) / 864e5;
+const expSoon = u => !!(u.expires && u.status !== "retired" && daysTo(u.expires) <= 60);
+const expTag = u => !u.expires || u.status === "retired" ? "" : daysTo(u.expires) < 0 ? '<span class="exptag gone">Expired</span>' : daysTo(u.expires) <= 60 ? `<span class="exptag">Expires ${esc(new Date(u.expires + "T12:00:00").toLocaleDateString([], { month:"short", day:"numeric" }))}</span>` : "";
+const money = n => "$" + Math.round(n).toLocaleString();
+const ICON_CHEV = '<span class="chev">›</span>';
+const mi = (id, title, sub) => `<button class="mitem" id="${id}" type="button"><span>${title}<small>${sub}</small></span>${ICON_CHEV}</button>`;
+
+function navUI(){
+  const on = isAdminUser() && !document.body.classList.contains("kp") && !S.typing;
+  document.body.classList.toggle("navon", on);
+  if (on) { const h = $("#nav").offsetHeight; if (h) document.body.style.setProperty("--navh", h + "px"); }
+}
+function showPage(){
+  const inv = S.page === "inv";
+  $("#v-count").hidden = !(inv && S.tab === "count"); $("#v-stock").hidden = !(inv && S.tab === "stock"); $("#enterbar").hidden = !(inv && S.tab === "count");
+  PAGES.forEach(p => { $("#v-" + p).hidden = S.page !== p; });
+  $("header .tabs").hidden = !inv;
+  document.querySelectorAll("#nav [data-pg]").forEach(b => { if (b.dataset.pg === S.page) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+  navUI();
+}
+function setPage(p){
+  if (p === "inv" || !PAGES.includes(p)) { setTab(S.tab || "count"); window.scrollTo(0, 0); return; }
+  if (!isAdminUser()) return;
+  if (S.qe) setQuickEdit(false);
+  closePad();
+  S.page = p; showPage(); renderPage(true); navBadges(); window.scrollTo(0, 0);
+}
+function renderPage(force){
+  if (S.page === "inv" || !isAdminUser()) return;
+  const el = $("#v-" + S.page), a = document.activeElement;
+  // don't redraw under someone's thumb while they're typing a name
+  if (!force && a && el.contains(a) && a.matches("input,textarea,select")) { S.pagePending = true; return; }
+  S.pagePending = false;
+  ({ overview:renderOverview, cars:renderCars, lists:renderLists, admin:renderAdmin })[S.page]();
+}
+function setBadge(p, n){ const b = $("#nb-" + p); if (!b) return; b.hidden = !n; b.textContent = n > 99 ? "99+" : String(n); }
+function navBadges(){
+  if (!isAdminUser()) return;
+  const t = totals();
+  setBadge("lists", S.items.filter(it => isLow(it, t.get(it.id))).length);
+  setBadge("cars", S.units.filter(u => u.status !== "retired" && (unitStats(u).due || expSoon(u))).length);
+  setBadge("admin", reviewList().length);
+}
+
+/* Overview: numbers at a glance, what the crew did, reports */
+function activity(limit){
+  const ev = [];
+  for (const m of S.moves){
+    if (m.type === "transfer" && Number(m.qty) < 0) continue; // a Move is two rows; show it once
+    const it = find(S.items, m.item_id); if (!it) continue;
+    const q = Number(m.qty) || 0, nm = itemTitle(it);
+    const what = m.type === "transfer" ? `Moved ${q} × ${nm}` : m.type === "used" ? `Used ${-q} × ${nm}` : m.type === "damaged" ? `Damaged ${-q} × ${nm}` : `${q > 0 ? "+" : ""}${q} × ${nm}`;
+    const where = m.type === "transfer" ? (m.note || "to " + locName(m.location_id)) : locName(m.location_id) + (m.bin ? " · " + m.bin : "");
+    ev.push({ ts:m.ts || Date.parse(m.at) || 0, by:m.by, what, where, note: m.type === "transfer" ? "" : (m.note || ""), photo:!!m.photo, key:"data-item", id:it.id });
+  }
+  for (const u of S.units){ const it = find(S.items, u.item_id) || {}; ev.push({ ts:Date.parse(u.created_at) || 0, by:u.created_by, what:`Added ${it.part_id ? itemTitle(it) : "unit"} #${u.serial}`, where:locName(u.location_id), note:u.notes || "", photo:!!u.photo, key:"data-unit", id:u.id }); }
+  for (const l of S.ulog){
+    const u = find(S.units, l.unit_id); if (!u) continue;
+    ev.push({ ts:l.ts || Date.parse(l.at) || 0, by:l.by, what:`${LOG_TYPES[l.type] || l.type} · #${u.serial}`, where:[l.hours != null && l.hours !== "" ? num1(l.hours) + " h" : "", l.laps != null && l.laps !== "" ? l.laps + " laps" : ""].filter(Boolean).join(" · "), note:l.note || "", photo:(l.files || []).length > 0, key:"data-unit", id:u.id });
+  }
+  return ev.sort((a, b) => b.ts - a.ts).slice(0, limit);
+}
+function dayLabel(ts){
+  const d = new Date(ts), t = new Date(), y = new Date(); y.setDate(t.getDate() - 1);
+  if (d.toDateString() === t.toDateString()) return "Today";
+  if (d.toDateString() === y.toDateString()) return "Yesterday";
+  return d.toLocaleDateString([], { weekday:"short", month:"short", day:"numeric" });
+}
+function renderOverview(){
+  const t = totals();
+  let pieces = 0, value = 0, valued = 0;
+  for (const it of S.items){ const n = itemTotal(t.get(it.id)); pieces += n; if (it.unit_value != null && it.unit_value !== "") { value += Number(it.unit_value) * n; valued++; } }
+  const low = S.items.filter(it => isLow(it, t.get(it.id))).length;
+  const live = S.units.filter(u => u.status !== "retired");
+  const due = live.filter(u => unitStats(u).due).length, exp = live.filter(expSoon).length, rev = reviewList().length;
+  const tile = (id, label, big, small, hot) => `<button class="tile ${hot ? "hot" : ""}" type="button" id="${id}"><span>${label}</span><b>${big}</b><small>${small}</small></button>`;
+  const ev = activity(40);
+  let feed = "", lastDay = "";
+  for (const e of ev){
+    const dl = dayLabel(e.ts);
+    if (dl !== lastDay) { feed += `<div class="day">${esc(dl)}</div>`; lastDay = dl; }
+    feed += `<button class="row" type="button" ${e.key}="${esc(e.id)}"><div><div class="t">${esc(e.what)}</div><div class="m"><span class="byi" title="${esc(nameOf(e.by))}">${esc(initialsOf(e.by) || "—")}</span>${e.where ? `<span>${esc(e.where)}</span>` : ""}<span>${esc(new Date(e.ts).toLocaleTimeString([], { hour:"numeric", minute:"2-digit" }))}</span>${e.note ? `<span>${esc(e.note)}</span>` : ""}${e.photo ? "<span>photo</span>" : ""}</div></div></button>`;
+  }
+  $("#v-overview").innerHTML = `<div class="pghd"><h2>Overview</h2><small>${esc(new Date().toLocaleDateString([], { weekday:"short", month:"short", day:"numeric" }))}</small></div>
+    <div class="tiles">
+      ${tile("ov-value", "Inventory value", valued ? money(value) : "—", valued ? `From ${plural(valued, "item")} with a value` : "Add values in the bulk sheet (Admin)")}
+      ${tile("ov-stock", "In stock", pieces, plural(S.items.length, "item"))}
+      ${tile("ov-low", "Running low", low, low ? "Open the supply list" : "Nothing below Keep at least", low)}
+      ${tile("ov-due", "Due for rebuild", due, due ? "Engines and chassis" : "Nothing due", due)}
+      ${tile("ov-exp", "Expiring soon", exp, exp ? "Within 60 days" : "Nothing in the next 60 days", exp)}
+      ${tile("ov-rev", "New to review", rev, rev ? "Names the crew added" : "All caught up", rev)}
+    </div>
+    <h3 class="sec">Latest activity</h3>
+    <div class="list" id="ov-feed">${feed || `<div class="empty"><strong>Nothing yet</strong>Counts, moves and engine logs from everyone show up here.</div>`}</div>
+    <h3 class="sec">Reports</h3>
+    <div class="pgstack">
+      ${mi("ex-stock", "Stock totals", "Excel: every item, count per location, value, last entry and who")}
+      ${mi("ex-log", "Full log", "Excel: every count and move, with date, time and who")}
+      ${mi("ex-units", "Engines & chassis", "Excel: every unit, status, hours and laps, what's due")}
+      ${mi("ex-ulog", "Engine & chassis log", "Excel: every race, rebuild, repair and dyno entry")}
+      ${mi("mn-labels", "Print QR labels", "PDF for whatever the Stock tab is showing")}
+    </div>`;
+  $("#ov-value").onclick = () => setPage("admin");
+  $("#ov-stock").onclick = () => setTab("stock");
+  $("#ov-low").onclick = () => { S.listTab = "supply"; setPage("lists"); };
+  $("#ov-due").onclick = $("#ov-exp").onclick = () => { S.carsF = "attn"; setPage("cars"); };
+  $("#ov-rev").onclick = () => setPage("admin");
+  $("#ex-stock").onclick = () => exportCsv("stock");
+  $("#ex-log").onclick = () => exportCsv("log");
+  $("#ex-units").onclick = () => exportUnits("units");
+  $("#ex-ulog").onclick = () => exportUnits("log");
+  $("#mn-labels").onclick = () => { closePicker(); setTab("stock"); renderStock(); openLabels(); };
+}
+
+/* Cars: every engine and chassis with its status and what's due */
+function renderCars(){
+  const scats = S.cats.filter(c => c.serialized).sort((a, b) => (a.sort ?? 999) - (b.sort ?? 999) || byName(a, b));
+  const scatIds = new Set(scats.map(c => c.id));
+  const all = S.units.filter(u => scatIds.has((find(S.items, u.item_id) || {}).category_id));
+  const attn = u => u.status !== "retired" && (unitStats(u).due || expSoon(u) || u.status === "needs_work" || u.status === "wrecked");
+  const nA = all.filter(attn).length, nR = all.filter(u => u.status === "retired").length;
+  const f = S.carsF;
+  const keep = u => f === "attn" ? attn(u) : f === "retired" ? u.status === "retired" : u.status !== "retired";
+  const live = all.filter(u => u.status !== "retired");
+  let h = `<div class="pghd"><h2>Engines & chassis</h2><small>${plural(live.length, "active unit")}</small></div>
+    <div class="segp three" role="group" aria-label="Show">
+      <button type="button" data-cf="active" aria-pressed="${f === "active"}">Active</button>
+      <button type="button" data-cf="attn" aria-pressed="${f === "attn"}">Needs attention${nA ? " (" + nA + ")" : ""}</button>
+      <button type="button" data-cf="retired" aria-pressed="${f === "retired"}">Retired${nR ? " (" + nR + ")" : ""}</button>
+    </div>`;
+  if (!scats.length) h += `<div class="list"><div class="empty"><strong>No serial-number categories</strong>Turn on Serial #s for a category under Admin › Edit categories.</div></div>`;
+  for (const c of scats){
+    const us = all.filter(u => (find(S.items, u.item_id) || {}).category_id === c.id && keep(u))
+      .sort((a, b) => (attn(b) - attn(a)) || itemTitle(find(S.items, a.item_id) || {}).localeCompare(itemTitle(find(S.items, b.item_id) || {})) || String(a.serial).localeCompare(String(b.serial), undefined, { numeric:true }));
+    h += `<div class="grp"><span>${esc(c.name)}</span><span>${us.length}</span></div><div class="list">`;
+    h += us.map(u => { const st = unitStats(u), it = find(S.items, u.item_id) || {}; return `<button class="row" type="button" data-unit="${esc(u.id)}"><div><div class="t">#${esc(u.serial)} <span style="font-weight:500;color:var(--muted)">· ${esc(itemTitle(it))}</span></div><div class="m"><span class="ustat ${esc(u.status)}">${esc(UNIT_STATUS[u.status] || u.status)}</span><span>${esc(locName(u.location_id))}</span><span>${esc(sinceText(st))} since rebuild</span>${st.due ? '<span class="duetag">Due</span>' : ""}${expTag(u)}</div></div><span class="code">${esc(u.code)}</span></button>`; }).join("")
+      || `<div class="empty">${f === "attn" ? "Nothing needs attention." : f === "retired" ? "None retired." : `No ${esc(c.name.toLowerCase())} yet. Add them on Inventory › Count: pick ${esc(c.name)}, then type each serial.`}</div>`;
+    h += `</div>`;
+  }
+  h += `<div class="soon"><b>Coming later</b>Car builds (which engine is in which chassis) and a race log: date, track, what got used and what broke.</div>`;
+  $("#v-cars").innerHTML = h;
+  $("#v-cars").querySelectorAll("[data-cf]").forEach(b => b.onclick = () => { S.carsF = b.dataset.cf; renderCars(); });
+}
+
+/* Lists: Supply (what's running low) and Track (placeholder) */
+function supplyRows(){
+  const t = totals();
+  return S.items.filter(it => isLow(it, t.get(it.id))).map(it => { const have = itemTotal(t.get(it.id)); return { it, have, need: it.min_qty - have }; })
+    .sort((a, b) => (catName(a.it.category_id) + itemTitle(a.it)).localeCompare(catName(b.it.category_id) + itemTitle(b.it), undefined, { numeric:true }));
+}
+function renderLists(){
+  const tab = S.listTab, rows = supplyRows();
+  let h = `<div class="pghd"><h2>Lists</h2></div>
+    <div class="segp" role="group" aria-label="List"><button type="button" data-lt2="supply" aria-pressed="${tab === "supply"}">Supply${rows.length ? " (" + rows.length + ")" : ""}</button><button type="button" data-lt2="track" aria-pressed="${tab === "track"}">Track</button></div>`;
+  if (tab === "supply") {
+    h += `<p class="hint" style="padding:0 2px 10px">Everything below its Keep at least number. Set Keep at least on an item's page or in the bulk sheet.</p>`;
+    h += `<div class="list">` + (rows.map(r => `<button class="row" type="button" data-item="${esc(r.it.id)}"><div><div class="t">${esc(itemTitle(r.it))}</div><div class="m"><span>${esc(catName(r.it.category_id))}</span><span>Have ${r.have} · keep ${esc(r.it.min_qty)}</span>${r.it.supplier ? `<span>${esc(r.it.supplier)}</span>` : ""}${r.it.part_number ? `<span class="code">${esc(r.it.part_number)}</span>` : ""}</div></div><div class="need">${r.need}<small>to buy</small></div></button>`).join("")
+      || `<div class="empty"><strong>Nothing running low</strong>Items show up here when they drop below their Keep at least number.</div>`) + `</div>`;
+    if (rows.length) h += `<div class="pgstack" style="margin-top:12px">${mi("ls-dl", "Download supply list", "Excel: what to buy, supplier, part number, estimated cost")}</div>`;
+    h += `<div class="soon"><b>Coming later</b>Mark things ordered, then tap Received when they show up and they count themselves in.</div>`;
+  } else {
+    h += `<div class="soon" style="margin-top:0"><b>Track list · coming soon</b>What goes in the hauler for each race, checked off by scanning the bins as they load.</div>`;
+  }
+  $("#v-lists").innerHTML = h;
+  $("#v-lists").querySelectorAll("[data-lt2]").forEach(b => b.onclick = () => { S.listTab = b.dataset.lt2; renderLists(); });
+  if ($("#ls-dl")) $("#ls-dl").onclick = downloadSupply;
+}
+async function downloadSupply(){
+  if (!S.downloads){ toast("Downloads aren't available in this view.", null, null, true); return; }
+  const rows = [["Category","Part","Size","Code","Bin","Have","Keep at least","To buy","Supplier","Part number","Value each","Estimated cost"]];
+  let tot = 0;
+  for (const r of supplyRows()){ const v = r.it.unit_value == null || r.it.unit_value === "" ? null : Number(r.it.unit_value), c = v == null ? "" : (v * r.need).toFixed(2); if (c !== "") tot += Number(c); rows.push([catName(r.it.category_id), partName(r.it.part_id), sizeName(r.it.size_id), r.it.code, r.it.bin || "", r.have, r.it.min_qty, r.need, r.it.supplier || "", r.it.part_number || "", v == null ? "" : v.toFixed(2), c]); }
+  if (tot > 0) { const b = rows[0].map(() => ""); b[0] = "TOTAL"; b[b.length - 1] = tot.toFixed(2); rows.push(b); }
+  const csv = "﻿" + rows.map(r => r.map(csvCell).join(",")).join("\r\n");
+  try { await S.downloads.save({ filename:`race-inventory-supply-list-${new Date().toISOString().slice(0,10)}.csv`, data:csv }); toast("Supply list saved"); }
+  catch (e) { if (e && e.code !== "declined") toast("Couldn't save the list.", null, null, true); }
+}
+
+/* Admin: review new names, users, spreadsheet, clean up, backup */
+function reviewList(){
+  const out = [];
+  const add = (coll, kind, rows, ctx) => rows.filter(r => r.reviewed === false && !r._pending).forEach(r => out.push({ coll, kind, r, ctx:ctx(r) }));
+  add("categories", "Category", S.cats, () => "");
+  add("parts", "Part", S.parts, r => "in " + catName(r.category_id));
+  add("sizes", "Size", S.sizes, r => { const p = find(S.parts, r.part_id); return p ? `for ${catName(p.category_id)} › ${p.name}` : ""; });
+  add("locations", "Location", S.locs, () => "");
+  return out.sort((a, b) => String(b.r.created_at || "").localeCompare(String(a.r.created_at || "")));
+}
+function usedText(coll, id){
+  const t = totals();
+  if (coll === "parts") { const its = S.items.filter(i => i.part_id === id); return its.length ? `${its.reduce((a, i) => a + itemTotal(t.get(i.id)), 0)} counted` : "not counted yet"; }
+  if (coll === "sizes") { const its = S.items.filter(i => i.size_id === id); return its.length ? `${its.reduce((a, i) => a + itemTotal(t.get(i.id)), 0)} counted` : "not counted yet"; }
+  if (coll === "categories") return plural(S.parts.filter(p => p.category_id === id).length, "part");
+  return plural(S.moves.filter(m => m.location_id === id).length, "entry").replace("entrys", "entries");
+}
+function approve(coll, id){
+  const key = { categories:"cats", parts:"parts", sizes:"sizes", locations:"locs" }[coll];
+  const r = find(S[key], id); if (r) r.reviewed = true;
+  write(() => S.db.doc(coll + "/" + id).update({ reviewed:true }), "the review");
+}
+function renderAdmin(){
+  const list = reviewList();
+  const when = r => r.created_at ? new Date(r.created_at).toLocaleString([], { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" }) : "";
+  const rows = list.map(x => {
+    const twins = x.coll === "parts" ? S.parts.filter(p => p.id !== x.r.id && similar(p.name, x.r.name)).slice(0, 3) : [];
+    return `<div class="rv" data-rv="${esc(x.coll)}/${esc(x.r.id)}">
+      <div class="r1"><span class="kind">${x.kind}</span><span class="m">${esc([x.ctx, nameOf(x.r.created_by) ? "added by " + nameOf(x.r.created_by) : "", when(x.r), usedText(x.coll, x.r.id)].filter(Boolean).join(" · "))}</span></div>
+      <div class="r2"><input value="${esc(x.r.name)}" data-rvname aria-label="Name for ${esc(x.r.name)}" autocomplete="off" enterkeyhint="done"><button class="btn ok" type="button" data-rvok>OK</button></div>
+      ${twins.length ? `<div class="acts">${twins.map(p => `<button class="btn sm" type="button" data-merge="${esc(p.id)}">Merge into ${esc(catName(p.category_id))} › ${esc(p.name)}</button>`).join("")}</div>` : ""}
+      <div class="err" data-rverr></div></div>`;
+  }).join("");
+  $("#v-admin").innerHTML = `<div class="pghd"><h2>Admin</h2><small>${esc((S.me && S.me.full_name) || "")}</small></div>
+    <h3 class="sec">New to review${list.length ? " (" + list.length + ")" : ""}</h3>
+    <p class="hint" style="padding:0 2px 10px">Names the crew adds work right away. Check them here: fix the spelling, merge a part into one you already have, or tap OK.</p>
+    ${list.length > 1 ? `<button class="btn" id="rv-all" type="button" style="width:100%;margin-bottom:8px">Approve all ${list.length}</button>` : ""}
+    <div class="list" id="rv-list">${rows || `<div class="empty"><strong>All caught up</strong>New parts, sizes, categories and locations from the crew show up here.</div>`}</div>
+    <h3 class="sec">Team</h3>
+    <div class="pgstack">${mi("ac-users", "Manage users", "Add people, set their level, reset passwords")}</div>
+    <h3 class="sec">Spreadsheet</h3>
+    <div class="pgstack">${mi("mn-bulk-dl", "Download bulk edit sheet", "Excel: Keep at least, part number, supplier, value, Used, Damaged, Bin")}${mi("mn-bulk-up", "Import bulk edit sheet", "Shows a preview before anything changes")}</div>
+    <h3 class="sec">Clean up and setup</h3>
+    <div class="pgstack">${mi("mn-dups", "Find duplicate parts", "Same part in two categories? Merge them")}${mi("ad-cats", "Edit categories", "Rename, delete, turn Serial #s on or off")}${mi("ad-locs", "Edit locations", "Shop, Hauler and any others")}</div>
+    <h3 class="sec">Backup</h3>
+    <div class="pgstack">${mi("ad-backup", "Download full backup", "One file with everything. Save it to Google Drive once a week.")}</div>`;
+  const pg = $("#v-admin");
+  pg.querySelectorAll("[data-rv]").forEach(card => {
+    const [coll, id] = card.dataset.rv.split("/"), inp = card.querySelector("[data-rvname]"), err = card.querySelector("[data-rverr]");
+    const key = { categories:"cats", parts:"parts", sizes:"sizes", locations:"locs" }[coll];
+    const saveName = () => { const v = inp.value.trim(), r = find(S[key], id); if (!v) { inp.value = r ? r.name : ""; return false; } if (r && v !== r.name) { r.name = v; renameDoc(coll, id, v); toast("Renamed to " + v); } return true; };
+    inp.onchange = () => saveName();
+    inp.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); inp.blur(); } };
+    card.querySelector("[data-rvok]").onclick = () => { if (!saveName()) return; approve(coll, id); toast("Approved"); renderAdmin(); navBadges(); };
+    card.querySelectorAll("[data-merge]").forEach(b => b.onclick = async () => {
+      const keep = find(S.parts, b.dataset.merge); if (!keep) return;
+      if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "Tap again to merge"; b.classList.add("armed"); return; }
+      b.disabled = true; b.textContent = "Merging…"; err.textContent = "";
+      try { await S.db.run(() => mergeParts(keep.id, id)); toast(`Merged into ${catName(keep.category_id)} › ${keep.name}`); renderAdmin(); navBadges(); }
+      catch (e) { err.textContent = (e && e.message) || "Merge didn't finish. Check signal and try again."; b.disabled = false; b.textContent = "Merge into " + keep.name; delete b.dataset.armed; b.classList.remove("armed"); }
+    });
+  });
+  if ($("#rv-all")) $("#rv-all").onclick = () => {
+    const b = $("#rv-all");
+    if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = `Tap again to approve all ${list.length}`; b.classList.add("armed"); return; }
+    list.forEach(x => approve(x.coll, x.r.id)); toast(`Approved ${list.length}`); renderAdmin(); navBadges();
+  };
+  $("#ac-users").onclick = () => { if (typeof openUsers === "function") openUsers(); };
+  $("#mn-bulk-dl").onclick = downloadBulkSheet;
+  $("#mn-bulk-up").onclick = openImport;
+  $("#mn-dups").onclick = openDups;
+  $("#ad-cats").onclick = () => { openCatPicker(); const e = $("#pk-edit"); if (e) e.click(); };
+  $("#ad-locs").onclick = () => { openLocPicker(); const e = $("#pk-edit"); if (e) e.click(); };
+  $("#ad-backup").onclick = downloadBackup;
+}
+async function downloadBackup(){
+  if (!S.downloads){ toast("Downloads aren't available in this view.", null, null, true); return; }
+  const clean = arr => arr.map(r => { const o = Object.assign({}, r); delete o._pending; return o; });
+  let ver = ""; try { ver = APP_VERSION; } catch {}
+  const data = { app:"Race Shop Inventory", version:ver, exported:new Date().toISOString(),
+    tables:{ categories:clean(S.cats), parts:clean(S.parts), sizes:clean(S.sizes), locations:clean(S.locs), items:clean(S.items), moves:clean(S.moves), units:clean(S.units), unit_log:clean(S.ulog) } };
+  try { await S.downloads.save({ filename:`race-inventory-backup-${new Date().toISOString().slice(0,10)}.json`, data:JSON.stringify(data, null, 1) }); toast("Backup saved"); }
+  catch (e) { if (e && e.code !== "declined") toast("Couldn't save the backup.", null, null, true); }
+}
+$("#nav").addEventListener("click", e => { const b = e.target.closest("[data-pg]"); if (b) setPage(b.dataset.pg); });
+$("main").addEventListener("click", e => {
+  if (S.page === "inv") return;
+  const u = e.target.closest("[data-unit]"); if (u) { openUnit(u.dataset.unit); return; }
+  const it = e.target.closest("[data-item]"); if (it) openItem(it.dataset.item);
+});
+// the keyboard covers the bar anyway; hide it while typing so nothing floats over the keys
+const TYPING = "input:not([type=file]):not([type=checkbox]):not([type=radio]), textarea, select";
+document.addEventListener("focusin", e => { if (e.target && e.target.matches && e.target.matches(TYPING)) { S.typing = true; navUI(); } });
+document.addEventListener("focusout", () => setTimeout(() => {
+  const a = document.activeElement; S.typing = !!(a && a.matches && a.matches(TYPING)); navUI();
+  if (!S.typing && S.pagePending) renderPage();
+}, 60));
+window.addEventListener("resize", () => navUI());
+
 /* ---------- tabs & wiring ---------- */
 function setTab(tab){
   if (S.role === "viewer") tab = "stock";
   S.tab = tab;
   if (tab !== "stock" && S.qe) setQuickEdit(false);
-  $("#v-count").hidden = tab !== "count"; $("#v-stock").hidden = tab !== "stock"; $("#enterbar").hidden = tab !== "count";
+  S.page = "inv"; showPage();
   document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
   keypadUI();
   if (tab === "stock") renderStock();
 }
-function renderAll(){ renderForm(); renderRecent(); if (S.tab === "stock") renderStock(); else $("#stock-n").textContent = S.items.length; if (P && !P.editing) renderPicker(); }
+function renderAll(){ renderForm(); renderRecent(); if (S.tab === "stock") renderStock(); else $("#stock-n").textContent = S.items.length; if (P && !P.editing) renderPicker(); renderPage(); navBadges(); }
 
 document.querySelectorAll(".tab").forEach(b => b.onclick = () => setTab(b.dataset.tab));
 $("#f-cat").onclick = openCatPicker;
@@ -1686,7 +2033,7 @@ document.addEventListener("click", e => {
 });
 ["#bin", "#note"].forEach(s => $(s).addEventListener("focus", () => { S.qtyActive = false; keypadUI(); }));
 document.addEventListener("keydown", e => {
-  if (S.tab !== "count" || P || !$("#scrim").hidden) return;
+  if (S.tab !== "count" || S.page !== "inv" || P || !$("#scrim").hidden) return;
   const t = e.target; if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return;
   if (/^[0-9]$/.test(e.key)) { e.preventDefault(); setQty(S.qtyStr + e.key); if (!S.qtyActive) { S.qtyActive = true; keypadUI(); } }
   else if (e.key === "Backspace") { e.preventDefault(); setQty(S.qtyStr.slice(0, -1)); }
@@ -1841,7 +2188,7 @@ const photoStore = {
 };
 const fileSaver = {
   async save({ filename, data }){
-    const type = filename.endsWith(".csv") ? "text/csv" : filename.endsWith(".png") ? "image/png" : filename.endsWith(".pdf") ? "application/pdf" : "application/octet-stream";
+    const type = filename.endsWith(".csv") ? "text/csv" : filename.endsWith(".png") ? "image/png" : filename.endsWith(".pdf") ? "application/pdf" : filename.endsWith(".json") ? "application/json" : "application/octet-stream";
     const blob = data instanceof Blob ? data : new Blob([data], { type });
     if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.canShare) {
       // iPhone: the share sheet lets you Save to Files, print, or AirDrop to a label printer
@@ -1914,7 +2261,7 @@ async function callUsers(body){
 const initials = n => (String(n || "").trim().split(/\s+/).map(w => w[0]).join("").slice(0, 2) || "?").toUpperCase();
 const makePassword = () => { const a = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"; return Array.from(crypto.getRandomValues(new Uint8Array(10)), b => a[b % a.length]).join(""); };
 
-const APP_VERSION = "2.6 · Oct 19, 2026";
+const APP_VERSION = "2.7 · Oct 20, 2026";
 // small screen report for troubleshooting layout on phones
 function screenInfo(){
   const app = (window.navigator.standalone || matchMedia("(display-mode: standalone)").matches) ? "home-screen app" : "browser";
@@ -1931,22 +2278,11 @@ function openAccount(){
       <div class="mgroup need-edit"><h4>Counting</h4>
         <button class="mitem" id="mn-recent" type="button"><span>Recent entries<small>Your latest counts, with Undo</small></span>${chev}</button>
       </div>
-      <div class="mgroup need-edit"><h4>Bulk changes</h4>
-        <button class="mitem" id="mn-bulk-dl" type="button"><span>Download bulk edit sheet<small>Excel: fill in Keep at least, Used, Damaged, Bin</small></span><span class="chev">›</span></button>
-        <button class="mitem" id="mn-bulk-up" type="button"><span>Import bulk edit sheet<small>Shows a preview before anything changes</small></span><span class="chev">›</span></button>
-      </div>
-      <div class="mgroup"><h4>Reports</h4>
-        <button class="mitem" id="ex-stock" type="button"><span>Stock totals<small>Excel: every item, count per location, last entry and who</small></span>${chev}</button>
-        <button class="mitem" id="ex-log" type="button"><span>Full log<small>Excel: every count and move, with date, time and who</small></span>${chev}</button>
-        <button class="mitem" id="ex-units" type="button"><span>Engines & chassis<small>Excel: every unit, status, hours and laps, what's due</small></span>${chev}</button>
-        <button class="mitem" id="ex-ulog" type="button"><span>Engine & chassis log<small>Excel: every race, rebuild, repair and dyno entry</small></span>${chev}</button>
-        <button class="mitem" id="mn-labels" type="button"><span>Print QR labels<small>PDF for whatever the Stock tab is showing</small></span>${chev}</button>
-      </div>
       <div class="mgroup"><h4>Settings on this phone</h4>
         <div class="seg3" role="group" aria-label="Theme">${[["auto","Auto"],["light","Light"],["dark","Dark"]].map(([k,v]) => `<button type="button" data-th="${k}" aria-pressed="${th === k}">${v}</button>`).join("")}</div>
         <div class="mitem need-edit" style="cursor:default"><span>Open the part list after Enter<small>Faster counting. Turn off to stay on the form.</small></span><button class="switch" id="mn-auto" type="button" role="switch" aria-checked="${auto}" aria-label="Open the part list after Enter"></button></div>
       </div>
-      ${S.role === "admin" ? `<div class="mgroup"><h4>Master admin</h4><button class="mitem" id="ac-users" type="button"><span>Manage users<small>Add people, set their level, reset passwords</small></span>${chev}</button><button class="mitem" id="mn-dups" type="button"><span>Find duplicate parts<small>Same part in two categories? Merge them</small></span>${chev}</button></div>` : ""}
+      ${S.role === "admin" ? `<p class="hint">Reports, users, the bulk sheet and backups are on the bar at the bottom of the screen.</p>` : ""}
       <div class="mgroup"><h4>Account</h4>
         <button class="mitem" id="ac-pw" type="button"><span>Change my password</span>${chev}</button>
         <div id="ac-pwbox" hidden><div class="pwrow"><input id="ac-newpw" type="password" placeholder="New password (8+ characters)" autocomplete="new-password"><button class="btn" id="ac-pwsave" type="button">Save</button></div><div class="err" id="ac-err"></div></div>
@@ -1957,20 +2293,11 @@ function openAccount(){
     </div></div>`;
   $("#ac-x").onclick = closePicker;
   $("#mn-recent").onclick = openRecent;
-  $("#mn-bulk-dl").onclick = downloadBulkSheet;
-  $("#mn-bulk-up").onclick = openImport;
-  if ($("#mn-dups")) $("#mn-dups").onclick = openDups;
-  $("#ex-stock").onclick = () => exportCsv("stock");
-  $("#ex-log").onclick = () => exportCsv("log");
-  $("#ex-units").onclick = () => exportUnits("units");
-  $("#ex-ulog").onclick = () => exportUnits("log");
-  $("#mn-labels").onclick = () => { closePicker(); setTab("stock"); renderStock(); openLabels(); };
   sc.querySelectorAll("[data-th]").forEach(b => b.onclick = () => {
     store.set("theme", b.dataset.th); applyTheme(b.dataset.th);
     sc.querySelectorAll("[data-th]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
   });
   $("#mn-auto").onclick = e => { const on = e.currentTarget.getAttribute("aria-checked") !== "true"; e.currentTarget.setAttribute("aria-checked", String(on)); store.set("autonext", on); };
-  if ($("#ac-users")) $("#ac-users").onclick = openUsers;
   $("#ac-pw").onclick = () => { $("#ac-pwbox").hidden = false; $("#ac-newpw").focus(); };
   $("#ac-pwsave").onclick = async () => {
     const v = $("#ac-newpw").value;
@@ -2116,6 +2443,7 @@ async function startApp(session){
   S.me = me; S.role = me.role;
   document.body.classList.remove("r-viewer", "r-editor", "r-admin");
   document.body.classList.add("r-" + me.role);
+  S.page = "inv"; showPage();
   $("#who").textContent = initials(me.full_name || me.email);
   $("#auth").hidden = true;
   S.assets = me.role === "viewer" ? null : photoStore;

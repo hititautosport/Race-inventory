@@ -39,9 +39,9 @@ Free plan notes: the project pauses after 7 days with no use (data is kept; unpa
 | Level | Can do |
 |---|---|
 | **No access** | Can sign in but sees "Waiting for access". Every new account starts here unless the admin picks a level |
-| **View only** | Stock tab only: search, filters, item details, QR labels, export. No Count tab, no editing |
-| **Editor** | Everything on Count and Stock: count, add/rename categories, parts, sizes, locations, undo and delete count entries, save bins, photos |
-| **Master admin** | Everything, plus all deletes (categories, parts, sizes, items, locations, photos) and the Users screen |
+| **View only** | Stock tab only: search, filters, item details, QR labels. No Count tab, no editing, no reports |
+| **Editor** (the crew) | Count and Stock: count, add/rename categories, parts, sizes, locations, undo and delete count entries, save bins, photos, Move, Used/Damaged, engine/chassis log entries. No reports, bulk sheet, Fix, Keep at least or quick edit |
+| **Master admin** | Everything, plus the **bottom bar** (Overview, Cars, Lists, Admin), reports, bulk sheet, Fix, Keep at least, quick edit, reviewing crew-added names, all deletes and the Users screen |
 
 Rules enforced in the database (row level security), not just hidden in the app:
 - Read inventory: View only and up. Add/change: Editor and up. Delete count entries: Editor and up. Delete anything else: Master admin.
@@ -149,7 +149,7 @@ Speed is the top requirement. Any change must keep these behaviors:
 - **Labels** button: makes one PDF of QR labels for exactly the items currently showing (search or filter first, e.g. "Suspension" or "Rack B"). Two formats: **Label printer** (one 3.5 × 1.5 in label per page) or **Letter sheets** (Avery 5163/8163, 2 × 4 in, 10 per page). The choice is remembered.
 - Grouped by category, searchable by part, size, code or bin, filterable by location. Category headings are large (24px, white, total in red); part names are smaller (14px) so categories stand out while scrolling.
 - Tap an item: code, QR, qty per location, photo, home bin (editable), full history with delete, **Count more**, **Move** (Editor+: from/to location with on-hand counts, how many, blocks moving more than is there; saved as two linked `transfer` rows, −qty at From and +qty at To, sharing a `transfer_id`; Undo or deleting either row removes both), **Save QR label** (PNG, 1050×450, sized for 3.5×1.5 in labels), **Delete item** (two taps; removes the item and its entries from inventory, keeps the part name in the list).
-- Exports and label printing are in the **Menu** (section 5a).
+- Exports are on the Overview tab (Master admin). The Labels button on Stock stays for everyone. Quick edit (the **Edit** button) is Master admin only.
 
 ## 5c. Engines and chassis: serialized units (v2.6)
 
@@ -160,7 +160,8 @@ Speed is the top requirement. Any change must keep these behaviors:
 - **Unit page:** status (Ready / Needs work / Wrecked / Retired), location, builder, last rebuild, Since rebuild and Lifetime hours and laps, optional rebuild interval (hours and/or laps) that turns on a **Due** tag, notes, photo, its own QR code (unit code = item code + "-01", "-02"…), **Save QR label**, **Edit details**, **Add log entry**, **Delete unit** (Master admin; Editors can only undo a unit with no log yet).
 - **Log entries:** Race, Test, Rebuild, Repair, Crash, Dyno, Note; date; hours and laps (both optional); note; any number of photos or PDFs (dyno sheets, receipts; up to 10 MB each). A **Rebuild** entry resets "since rebuild" to zero. Entries can be deleted (Editor+).
 - **Scanning** a unit's QR opens that unit's page. **Labels** on Stock print one label per unit (Retired skipped) with "SN <serial>".
-- **Reports (Menu):** **Engines & chassis** (one row per unit: code, serial, status, location, builder, hours/laps since rebuild and lifetime, last rebuild, intervals, DUE, notes) and **Engine & chassis log** (every entry with date, type, hours, laps, note, file names, who).
+- **Expires** date on a unit (optional; for belts, seat, fire system, nets): set in Edit details; shows an orange "Expires Mar 3" tag within 60 days and a red "Expired" tag after. In the Engines & chassis report.
+- **Reports (Overview tab):** **Engines & chassis** (one row per unit: code, serial, status, location, builder, hours/laps since rebuild and lifetime, last rebuild, intervals, DUE, notes) and **Engine & chassis log** (every entry with date, type, hours, laps, note, file names, who).
 - Quick edit and the bulk sheet don't do Used/Damaged on serialized parts (set the unit's status instead).
 
 ## 5b. Fixing mistakes, low stock, Used/Damaged, bulk changes (v2.5)
@@ -168,22 +169,36 @@ Speed is the top requirement. Any change must keep these behaviors:
 **Rule:** none of this touches the Count screen. The only thing that can appear while counting is the duplicate prompt below, and only when a near-identical part already exists.
 
 - **Duplicate prompt when adding a part:** before creating a new part, the app checks every category for the same or a similar name (ignores case, spaces, hyphens, plural "s", and catches short forms like "Carb" vs "Carburetor"). If found, it offers **Use Engine › Carburetor** or **Add "Carb" to Fuel anyway**.
-- **Find duplicate parts** (Menu → Master admin): groups same/similar part names across all categories. Tap **Keep** on the right one, tap again to confirm, and the others merge into it.
+- **Find duplicate parts** (Admin tab): groups same/similar part names across all categories. Tap **Keep** on the right one, tap again to confirm, and the others merge into it.
 - **Merge parts** (master admin, run from the app in order): each item of the merged part moves to the kept part. Sizes line up by name (missing sizes move over). If the kept part already has the same part+size item, the two items are merged: all counts/history move to the kept item, which fills in a blank bin, photo or low-stock number from the other, then the extra item is removed. Finally the merged part is removed.
 - **Fix** (item screen, Editor+): pick Category, Part (or "＋ New part '<same name>' here") and Size (or "＋ New size"). Counts and history stay with the item. If the result is identical to an existing item, a Master admin is offered **Merge into CODE**; an Editor is told to ask a master admin.
 - **Used / Damaged** (item screen, Editor+): Used or Damaged, take from a location (shows on-hand), how many (can't exceed what's there), optional note. Saved as a negative `used`/`damaged` move. Undo on the toast.
 - **Keep at least** (low stock): on the item screen next to Home bin, with a single Save. Stock rows show a red **Low** tag when the total across all locations is below it; a **Low (N)** filter chip appears when anything is low. Stock export has "Keep at least" and "Low" columns.
 - **Quick edit** (Stock tab → **Edit**, Editor+): every row gets Keep at least / Used / Damaged boxes; pick which location Used/Damaged come out of; changed boxes turn red; one **Save N changes** button at the bottom (or Cancel). Won't save if a Used/Damaged number is more than what's in that location. Works with search and filters.
-- **Bulk edit sheet** (Menu → Bulk changes, Editor+): **Download** makes a CSV (opens in Excel) with Code, Category, Part, Size, Bin, a column per location, Total, Keep at least, **Part number, Supplier, Value each** (back-end only, not shown in the app), Used, Damaged, Take from, Note. Value accepts "$1,250.50". Fill in what you need and **Import** it (CSV or Excel .xlsx). A preview lists what will change and what's skipped (unknown codes, non-numbers, taking more than is there); nothing changes until **Apply**. A blank Bin cell clears the bin; a blank Keep at least clears it. Applied through the database function `bulk_apply` in batches of 150.
+- **Bulk edit sheet** (Admin tab, Master admin only): **Download** makes a CSV (opens in Excel) with Code, Category, Part, Size, Bin, a column per location, Total, Keep at least, **Part number, Supplier, Value each** (back-end only, not shown in the app), Used, Damaged, Take from, Note. Value accepts "$1,250.50". Fill in what you need and **Import** it (CSV or Excel .xlsx). A preview lists what will change and what's skipped (unknown codes, non-numbers, taking more than is there); nothing changes until **Apply**. A blank Bin cell clears the bin; a blank Keep at least clears it. Applied through the database function `bulk_apply` in batches of 150.
 
-## 5a. Menu (tap your initials, top right)
+## 5a. Menu (tap your initials, top right): personal stuff only
 
 - **Counting** (Editor+): Recent entries (last 25 counts with Undo; has a Menu button to go back).
-- **Bulk changes** (Editor+): Download bulk edit sheet, Import bulk edit sheet.
-- **Reports:** Stock totals (Excel, now with Part number, Supplier, Value each, Total value and a TOTAL VALUE row), Full log (Excel), Engines & chassis (Excel), Engine & chassis log (Excel), Print QR labels (opens Labels for whatever Stock is showing).
 - **Settings on this phone:** Theme (Auto / Light / Dark), "Open the part list after Enter" (on by default; Editors+ only). Saved per phone.
-- **Master admin:** Manage users, Find duplicate parts.
-- **Account:** Change my password, Sign out. App version and screen report at the bottom (currently 2.6).
+- **Account:** Change my password, Sign out. App version and screen report at the bottom (currently 2.7).
+- Reports, bulk sheet, users, duplicates and backup moved to the Master admin bottom bar (section 5d).
+
+## 5d. Master admin bottom bar (v2.7)
+
+Only Master admin accounts see it. Editors and View only keep the plain Count/Stock screen with no bar. Five tabs:
+
+1. **Inventory:** the exact same Count and Stock screen the crew uses. The Enter bar sits right on top of the tab bar. The tab bar hides while the number pad is open or the keyboard is up (typing in any box), then comes back.
+2. **Overview:** six tiles (Inventory value, In stock, Running low, Due for rebuild, Expiring soon, New to review; red outline when something needs you; tap to jump to the list). **Latest activity:** last 40 counts, moves, Used/Damaged, units added and engine/chassis log entries from everyone, grouped by day, with the person's initials; tap to open the item or unit. **Reports:** Stock totals, Full log, Engines & chassis, Engine & chassis log, Print QR labels.
+3. **Cars:** every engine and chassis (any category with Serial #s on), grouped by category. Filters: Active, Needs attention (Due, expiring within 60 days, Needs work, Wrecked), Retired. Tap opens the unit page; closing it stays on Cars. Placeholder card for car builds and race log (later).
+4. **Lists:** **Supply** = every item below its Keep at least (have, keep, how many to buy, supplier, part number), plus **Download supply list** (Excel with estimated cost and total). Placeholder for ordered/received (later). **Track** = placeholder for the hauler load-out list (later).
+5. **Admin:** **New to review** (see below), Manage users, Download/Import bulk edit sheet, Find duplicate parts, Edit categories (incl. Serial #s switch), Edit locations, **Download full backup** (one .json file with every table; save it to Google Drive weekly).
+
+Badges (red number) on the tab bar: Cars = due + expiring; Lists = running low; Admin = names waiting for review.
+
+**New-name review:** anything an Editor adds (category, part, size, location) works immediately; nothing waits. The database marks it `reviewed = false` (column default is `is_admin()`, so names a Master admin adds skip review). The Admin tab lists them newest first with who added it, when, and how many are counted. Fix the spelling in the box (saves when you leave it), tap **OK** to approve, or for parts that look like an existing one tap **Merge into …** twice (items, counts and history move over). **Approve all** takes two taps.
+
+Scanning a label while on an admin tab opens the item/unit over that tab (doesn't jump back to Inventory).
 
 ## 6. QR / label rules
 
@@ -241,6 +256,8 @@ create view public.stock with (security_invoker) as select item_id, location_id,
 -- team_names(): id + name of every profile, only for viewer+; used for the "By" columns in exports
 -- items.min_qty int (Keep at least / low stock); items.part_number text, items.supplier text, items.unit_value numeric(12,2) (bulk sheet + Stock totals report only)
 -- categories.serialized boolean
+-- categories, parts, sizes, locations: created_by uuid default auth.uid(), reviewed boolean default is_admin() (existing rows set true) -- v2.7 review list
+-- units.expires date -- v2.7
 -- units (id, item_id -> items cascade, code unique, serial, status ready|needs_work|wrecked|retired, location_id, builder, notes, photo, rebuild_hours, rebuild_laps, created_at, created_by)
 --   RLS: read viewer+, add/change editor+, delete master admin, or editor if the unit has no log entries
 -- unit_log (id, unit_id -> units cascade, type race|test|rebuild|repair|crash|dyno|note, hours, laps, note, files jsonb [{path,name,type}], at, ts, by)
@@ -258,7 +275,7 @@ Phase 4 tables still to add: `tracks (id, name, track_type)`, `kits (id, name, t
 
 ## 9. Testing
 
-After every change, run a full tap-through test on a phone-sized touch screen with a stand-in for Supabase that enforces the same permission rules: first-admin setup, sign in (wrong and right password), every picker, Add new, Edit list rename/delete, number pad keys (fast double taps, Back, Clear, Close, tap-outside), +/−, bin, note, photo, Enter, both Undos, Stock search and filters, item sheet (QR link, bin, label, Count more, history delete, Delete item), Export, Users screen (add, duplicate email, change level, last-admin guard, reset password, remove), change own password, sign out, View only and Editor restrictions, No access screen, opening a QR link, light and dark theme, no sideways scrolling, no script errors. Also: Scan (camera finds a label, unknown code, typed code, camera stops on Close), Move (over-limit blocked, both rows written and linked, Undo and history delete remove both, not in Just counted), label PDFs in both formats for exactly what Stock shows, export columns for who and when. Also: saves arrive in order (the stand-in database enforces the same links between tables and answers in random order like a phone connection), status hidden when saved, Menu reports/theme/setting. Also: the Count screen has exactly the same controls as before (checked by id), duplicate prompt, Find duplicates merge (totals add up), Fix to another category, Fix into an existing item (merge), Used/Damaged limits and Undo, Keep at least + Low tag + Low filter, Quick edit with limit check, bulk sheet download → edit → import preview → apply, Editor and View only restrictions. Also: bottom-bar camera saves with a photo, Enter saves without. Also: part number/supplier/value through the bulk sheet and Stock report; serial entry (focus, Go key, duplicate block, Undo, part stays selected, no count entries), unit page log with hours/laps, PDF attachment, rebuild interval → Due, Rebuild resets, Retired drops out of the count, Hauler location, scanning a unit, unit label, unit labels in batch, both unit reports, admin category switch, View only can't log or edit. The latest run passed 75/75 checks. Proven: the version before this fix lost 5 of 6 rapid new-item counts in the same test; the fixed version saved 6 of 6.
+After every change, run a full tap-through test on a phone-sized touch screen with a stand-in for Supabase that enforces the same permission rules: first-admin setup, sign in (wrong and right password), every picker, Add new, Edit list rename/delete, number pad keys (fast double taps, Back, Clear, Close, tap-outside), +/−, bin, note, photo, Enter, both Undos, Stock search and filters, item sheet (QR link, bin, label, Count more, history delete, Delete item), Export, Users screen (add, duplicate email, change level, last-admin guard, reset password, remove), change own password, sign out, View only and Editor restrictions, No access screen, opening a QR link, light and dark theme, no sideways scrolling, no script errors. Also: Scan (camera finds a label, unknown code, typed code, camera stops on Close), Move (over-limit blocked, both rows written and linked, Undo and history delete remove both, not in Just counted), label PDFs in both formats for exactly what Stock shows, export columns for who and when. Also: saves arrive in order (the stand-in database enforces the same links between tables and answers in random order like a phone connection), status hidden when saved, Menu reports/theme/setting. Also: the Count screen has exactly the same controls as before (checked by id), duplicate prompt, Find duplicates merge (totals add up), Fix to another category, Fix into an existing item (merge), Used/Damaged limits and Undo, Keep at least + Low tag + Low filter, Quick edit with limit check, bulk sheet download → edit → import preview → apply, Editor and View only restrictions. Also: bottom-bar camera saves with a photo, Enter saves without. Also: part number/supplier/value through the bulk sheet and Stock report; serial entry (focus, Go key, duplicate block, Undo, part stays selected, no count entries), unit page log with hours/laps, PDF attachment, rebuild interval → Due, Rebuild resets, Retired drops out of the count, Hauler location, scanning a unit, unit label, unit labels in batch, both unit reports, admin category switch, View only can't log or edit. v2.7 adds: admin bar shows 5 tabs and the Count screen inside Inventory has the same controls, Enter bar sits exactly on the tab bar, bar hides with the number pad and while typing; Overview tiles, activity with initials, item opens and closes back to Overview, Running low → Supply list → supply Excel; Track placeholder; Cars list, filters, unit opens/closes back to Cars, expiry date saves/shows/clears, badge; Admin page buttons, full backup has every row, category and location edit lists; Editor sees no bar, no reports/bulk/Fix/Keep at least/quick edit but keeps Move, Used, bin, Count more; View only has no reports; crew-added part works immediately and lands in review with who and how many, rename + OK approves, merge into an existing part adds the counts, Approve all clears list and badge, admin-added names skip review. The latest run passed 83/83 checks. Proven: the version before this fix lost 5 of 6 rapid new-item counts in the same test; the fixed version saved 6 of 6.
 
 ## 10. How to continue in a new chat
 
@@ -268,9 +285,13 @@ Upload this file and say something like:
 
 The code is `index.html` in the `hititautosport/Race-inventory` GitHub repo; this guide is also saved there as `BUILD_GUIDE.md`. Database changes go to the Supabase project in section 2.
 
+**Rolling back:** each release before a big change is saved as a branch (`v2.6-backup` = v2.6). To roll back, copy that branch's `index.html` onto `main` and push; GitHub Pages updates in about a minute. Keep database changes additive (new columns/tables with defaults, never drops or renames) so an older app version keeps working.
+
 ---
 
 ## 11. Changelog
+
+- **2026-10-20** — v2.7: Master admin bottom bar (Inventory, Overview, Cars, Lists, Admin) with badges; crew screen unchanged except Fix, Keep at least, quick edit, reports and bulk sheet are now Master admin only; new-name review (crew additions work right away, admin approves/renames/merges later); supply list + Excel; unit expiry dates; full backup download; Menu trimmed to personal settings. Rollback point: GitHub branch `v2.6-backup` (exact v2.6 code). Database changes are additive only, so v2.6 still works if restored. 83/83 checks passed.
 
 - **2026-10-19** — v2.6: serialized Engines and Chassis (units with serial, status, location, hours/laps log, files, rebuild interval and Due, per-unit QR), Engine Parts / Chassis Parts for everything else; Part number, Supplier, Value each in the bulk sheet and Stock report. 75/75 checks passed.
 - **2026-10-19** — Bottom bar: equal-size buttons, Enter (without photo) left, red With photo right.
