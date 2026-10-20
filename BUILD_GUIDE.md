@@ -19,8 +19,8 @@ An inventory system for an ARCA race team bought with 15 chassis, 7 engines, 2 c
 
 | | |
 |---|---|
-| **App address** | https://hititautosport.github.io/race-inventory/ (GitHub Pages) |
-| **Code** | GitHub repo `hititautosport/race-inventory` — one file, `index.html` (HTML + CSS + vanilla JS). Pushing to `main` updates the live app in about a minute |
+| **App address** | https://hititautosport.github.io/Race-inventory/ (GitHub Pages) |
+| **Code** | GitHub repo `hititautosport/Race-inventory` — one file, `index.html` (HTML + CSS + vanilla JS). Pushing to `main` updates the live app in about a minute |
 | **Database** | Supabase org "18", project **Race Inventory** (ref `osbjpkhxerztakdqdyql`, region us-west-2, Free plan). URL `https://osbjpkhxerztakdqdyql.supabase.co` |
 | **Libraries** | `@supabase/supabase-js@2.45.4` (jsDelivr UMD), `qrcodejs 1.0.0` (cdnjs), Google Fonts: Barlow Condensed, IBM Plex Sans, IBM Plex Mono |
 | **Logins** | Supabase Auth, email + password. No public sign-up screen: the Master admin adds people from the Users screen |
@@ -143,7 +143,7 @@ Speed is the top requirement. Any change must keep these behaviors:
 
 - One QR per **item** (part + size). Small parts (shims, slugs, bolts) get the QR on the **bin**, not each piece.
 - Serialized parts (chassis, engines, shocks, rear ends, transmissions, carbs) should each be their own item with their own QR so each keeps its own history. Name them with the serial or number in the Size/spec field for now (e.g. Part "Chassis", Size "#7 Hamke"); Phase 5 adds proper serialized records.
-- The QR is a link: `https://hititautosport.github.io/race-inventory/#SUS-7K3Q`. Scanning it with the phone camera opens the app (after sign-in) straight to that item. The code after `#` is `items.code`, so a future in-app scanner reads the same labels.
+- The QR is a link: `https://hititautosport.github.io/Race-inventory/#SUS-7K3Q`. Scanning it with the phone camera opens the app (after sign-in) straight to that item. The code after `#` is `items.code`, so a future in-app scanner reads the same labels.
 - Print on oil-resistant polyester thermal labels. Label PNG is 1050×450 (3.5×1.5 in at 300 dpi).
 
 ---
@@ -209,7 +209,7 @@ Upload this file and say something like:
 
 > "This is the build guide for my race shop inventory app. Read it, then [do the next thing]. Keep every rule in sections 2a and 4. Update the guide's changelog when you're done."
 
-The code is `index.html` in the `hititautosport/race-inventory` GitHub repo; this guide is also saved there as `BUILD_GUIDE.md`. Database changes go to the Supabase project in section 2.
+The code is `index.html` in the `hititautosport/Race-inventory` GitHub repo; this guide is also saved there as `BUILD_GUIDE.md`. Database changes go to the Supabase project in section 2.
 
 ---
 
