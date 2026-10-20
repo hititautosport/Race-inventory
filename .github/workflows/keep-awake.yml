@@ -1,0 +1,22 @@
+# Supabase's free plan pauses a project after 7 days with no activity.
+# This pings the database twice a week so the inventory is always ready.
+name: Keep database awake
+
+on:
+  schedule:
+    - cron: "17 13 * * 1,4"   # Mondays and Thursdays, about 9 am Eastern
+  workflow_dispatch: {}        # lets you run it by hand from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        env:
+          URL: https://osbjpkhxerztakdqdyql.supabase.co
+          # public anon key (same one the app uses); it can't read any data without a sign-in
+          KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zYmpwa2h4ZXJ6dGFrZHFkeXFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0NDM4NTEsImV4cCI6MjEwODAxOTg1MX0.Oqoxce8m96Y_6s0E3NqKYI9FQ8sfWmzq2EQFMX9b-vE
+        run: |
+          set -e
+          echo "Database:"; curl -fsS "$URL/rest/v1/locations?select=id&limit=1" -H "apikey: $KEY" -H "Authorization: Bearer $KEY"; echo
+          echo "Users service:"; curl -fsS -X POST "$URL/functions/v1/manage-users" -H "apikey: $KEY" -H "Content-Type: application/json" -d '{"action":"status"}'; echo

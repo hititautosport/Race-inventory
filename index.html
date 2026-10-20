@@ -14,6 +14,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 /* Layout: one-column counting tool. Sticky header + tabs, fields stacked like a setup sheet, Enter bar pinned to the bottom. */
 :root{
@@ -170,7 +172,7 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
 .grp{font:700 15px/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:16px 2px 6px;display:flex;justify-content:space-between}
 
 /* stock toolbar */
-.tools{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px}
+.tools{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-bottom:8px}
 .search{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:0 12px;min-width:0}
 .search svg{width:18px;height:18px;color:var(--muted);flex:none}
 .search input{border:0;background:transparent;height:44px;width:100%;min-width:0;outline:0}
@@ -236,6 +238,33 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
   @keyframes rise{from{transform:scale(.95);opacity:0}to{transform:none;opacity:1}}
 }
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* scan */
+.scanbtn{flex:none;height:38px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border-radius:999px;border:2px solid var(--accent);background:var(--accent);color:var(--accent-ink);font:700 16px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercase}
+.scanbtn svg{width:18px;height:18px}
+@media (max-width:440px){ .sync span{display:none} .sync{padding:6px} }
+.cam{position:relative;background:#000;border-radius:16px;overflow:hidden;aspect-ratio:3/4;max-height:52vh;margin:12px auto 0;width:100%}
+.cam video{width:100%;height:100%;object-fit:cover;display:block}
+.cam .aim{position:absolute;inset:18%;border:3px solid var(--accent);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.scanmsg{text-align:center;margin:10px 0 0;font-weight:600}
+.manual{display:flex;gap:8px;margin-top:12px}
+.manual input{flex:1;min-width:0;height:46px;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:0 12px;text-transform:uppercase;font-family:var(--f-mono)}
+
+/* move */
+.movebox{margin-top:12px;display:grid;gap:10px;background:var(--sunk);border:2px solid var(--accent);border-radius:18px;padding:14px}
+.mvrow{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end}
+.mvrow .arrow{padding-bottom:12px;color:var(--muted);font-weight:700}
+.movebox select{height:48px;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:0 10px;width:100%;min-width:0;color:var(--ink)}
+.movebox .stepper input{height:56px;width:100%;min-width:0;text-align:center;border:2px solid var(--line);border-radius:12px;background:var(--surface);font:700 30px/1 var(--f-display);font-variant-numeric:tabular-nums;color:var(--ink)}
+.movebox .lbl2{font:600 11px/1.2 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.movebox .fld{display:grid;gap:6px}
+
+/* labels */
+.fmt{display:grid;gap:8px}
+.fmt button{display:grid;gap:2px;text-align:left;border:1.5px solid var(--line);background:var(--sunk);border-radius:14px;padding:12px 14px}
+.fmt button b{font-size:16px}
+.fmt button span{font-size:13px;color:var(--muted)}
+.fmt button[aria-pressed="true"]{border-color:var(--cobalt);background:color-mix(in srgb,var(--cobalt) 12%,var(--surface))}
 </style>
 </head>
 <body>
@@ -248,6 +277,7 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
       <h1 class="brand">Race Shop Inventory</h1>
       <div class="sync" id="sync" aria-live="polite"><i></i><span>Connecting</span></div>
       <button class="who" id="who" type="button" aria-label="Your account">?</button>
+      <button class="scanbtn" id="scan" type="button" aria-label="Scan a QR label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M8 12h8"/></svg>Scan</button>
     </div>
     <div class="tabs" role="tablist">
       <button class="tab need-edit" role="tab" id="tab-count" aria-selected="true" data-tab="count">Count</button>
@@ -293,6 +323,7 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
   <section id="v-stock" hidden>
     <div class="tools">
       <label class="search" for="q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg><input id="q" placeholder="Search part, size, code, bin" autocomplete="off"></label>
+      <button class="btn" id="b-labels" type="button">Labels</button>
       <button class="btn" id="b-export" type="button">Export</button>
     </div>
     <div class="seg" id="locf"></div>
@@ -431,7 +462,7 @@ function setVal(sel, v, ph){ const el = $(sel); el.textContent = v || ph; el.cla
 
 function renderRecent(){
   const el = $("#recent");
-  const ms = S.moves.slice().sort((a,b) => (b.ts||0) - (a.ts||0)).slice(0, 8);
+  const ms = S.moves.filter(m => !m.type || m.type === "count").sort((a,b) => (b.ts||0) - (a.ts||0)).slice(0, 8);
   if (!ms.length){
     el.innerHTML = `<div class="empty"><strong>Nothing counted yet</strong>Pick a category and part, type the quantity, and press Enter. Each entry shows up here so you can undo it.</div>`;
     return;
@@ -478,10 +509,16 @@ function enter(){
   openPartPicker();
 }
 function undoMove(id){
-  const db = S.db;
-  write(() => db.doc("moves/" + id).delete(), "the undo");
-  S.moves = S.moves.filter(m => m.id !== id); renderAll();
+  const db = S.db, m = find(S.moves, id);
+  // a Move between locations is two linked rows; remove both together
+  const ids = m && m.transfer_id ? S.moves.filter(x => x.transfer_id === m.transfer_id).map(x => x.id) : [id];
+  write(async () => { for (const x of ids) await db.doc("moves/" + x).delete(); }, "the undo");
+  S.moves = S.moves.filter(x => !ids.includes(x.id)); renderAll();
 }
+const nameOf = uid => (S.names && S.names[uid]) || "";
+const initialsOf = uid => { const n = nameOf(uid); return n ? n.trim().split(/\s+/).map(w => w[0]).join("").slice(0, 3).toUpperCase() : ""; };
+const typeName = t => ({ count:"Count", transfer:"Move", used:"Used", damaged:"Damaged", adjust:"Adjust", check_out:"Check out", check_in:"Check in" }[t || "count"] || t);
+const stamp = m => { const d = new Date(m.ts || m.at); if (isNaN(d)) return m.at || ""; const z = n => String(n).padStart(2, "0"); return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`; };
 const ALPH = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
 function newCode(catId){
   const pre = (catName(catId).replace(/[^A-Za-z]/g,"").slice(0,3) || "ITM").toUpperCase();
@@ -546,7 +583,7 @@ function openPicker(cfg){
   renderPicker();
   if (P.get().length > 12 || !P.get().length) setTimeout(() => qi.focus(), 60);
 }
-function closePicker(){ P = null; $("#scrim").hidden = true; $("#scrim").innerHTML = ""; }
+function closePicker(){ stopScan(); P = null; $("#scrim").hidden = true; $("#scrim").innerHTML = ""; }
 function renderPicker(){
   if (!P) return;
   const body = $("#pk-b"); if (!body) return;
@@ -719,6 +756,7 @@ function renderStock(){
     const qty = S.locFilter === "all" ? Object.values(o).reduce((a,b) => a+b, 0) : (o[S.locFilter] || 0);
     return { it, qty, hay: norm([catName(it.category_id), partName(it.part_id), sizeName(it.size_id), it.code, it.bin].join(" ")) };
   }).filter(r => !nq || r.hay.includes(nq)).filter(r => S.locFilter === "all" || r.qty !== 0);
+  S.shown = rows.map(r => r.it);
   const units = rows.reduce((a,r) => a + r.qty, 0);
   $("#sum").textContent = rows.length ? `${rows.length} item${rows.length>1?"s":""} · ${units} pieces` : "";
   const el = $("#stock");
@@ -746,10 +784,15 @@ function openItem(id){
       <div class="top"><dl class="kv"><dt>Code</dt><dd><span class="code" style="font-size:14px">${esc(it.code)}</span></dd>${locRows}</dl><div class="qr" id="it-qr" aria-label="QR code for ${esc(it.code)}"></div></div>
       ${it.photo ? `<img class="photo" data-photo="${esc(it.photo)}" alt="Photo of ${esc(itemTitle(it))}">` : ""}
       <div class="binedit need-edit"><input id="it-bin" value="${esc(it.bin || "")}" placeholder="Home bin / shelf" aria-label="Home bin"><button class="btn" id="it-binsave" type="button">Save bin</button></div>
-      <div class="actions"><button class="btn primary need-edit" id="it-count" type="button">Count more</button><button class="btn" id="it-label" type="button">Save QR label</button><button class="btn danger need-admin" id="it-del" type="button">Delete item</button></div>
+      <div class="actions"><button class="btn primary need-edit" id="it-count" type="button">Count more</button><button class="btn need-edit" id="it-move" type="button">Move</button><button class="btn" id="it-label" type="button">Save QR label</button><button class="btn danger need-admin" id="it-del" type="button">Delete item</button></div>
       <div class="why" id="it-delwhy" hidden style="margin-top:8px;font-size:13px;color:var(--bad);font-weight:600"></div>
+      <div class="movebox" id="it-movebox" hidden>
+        <div class="mvrow"><label class="fld"><span class="lbl2">From</span><select id="mv-from"></select></label><span class="arrow">→</span><label class="fld"><span class="lbl2">To</span><select id="mv-to"></select></label></div>
+        <div class="fld"><span class="lbl2">How many <span id="mv-have"></span></span><div class="stepper"><button type="button" id="mv-minus" aria-label="Minus one">−</button><input id="mv-qty" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="How many to move"><button type="button" id="mv-plus" aria-label="Plus one">+</button></div></div>
+        <button class="go" id="mv-go" type="button">Move</button><div class="err" id="mv-err"></div>
+      </div>
       <h2>History</h2>
-      <div class="hist">${ms.map(m => `<div class="row"><div><div class="t">${m.qty > 0 ? "+" : ""}${esc(m.qty)} · ${esc(locName(m.location_id))}${m.bin ? " · " + esc(m.bin) : ""}</div><div class="m"><span>${esc(new Date(m.ts || m.at).toLocaleString([], {month:"short", day:"numeric", hour:"numeric", minute:"2-digit"}))}</span>${m.note ? `<span>${esc(m.note)}</span>` : ""}</div></div><span class="confirm need-edit"><button class="undo" type="button" data-mdel="${esc(m.id)}">Delete</button></span></div>`).join("") || `<div class="empty">No entries.</div>`}</div>
+      <div class="hist">${ms.map(m => `<div class="row"><div><div class="t">${m.qty > 0 ? "+" : ""}${esc(m.qty)} · ${esc(locName(m.location_id))}${m.type && m.type !== "count" ? " · " + esc(typeName(m.type)) : ""}${m.bin ? " · " + esc(m.bin) : ""}</div><div class="m"><span>${esc(new Date(m.ts || m.at).toLocaleString([], {month:"short", day:"numeric", hour:"numeric", minute:"2-digit"}))}</span>${m.note ? `<span>${esc(m.note)}</span>` : ""}</div></div><span class="confirm need-edit"><button class="undo" type="button" data-mdel="${esc(m.id)}">Delete</button></span></div>`).join("") || `<div class="empty">No entries.</div>`}</div>
     </div></div>`;
   $("#it-x").onclick = closePicker;
   const ph = sc.querySelector("img.photo[data-photo]");
@@ -758,6 +801,7 @@ function openItem(id){
   $("#it-binsave").onclick = () => { const v = $("#it-bin").value.trim(); write(() => S.db.doc("items/" + id).update({ bin:v }), "the bin"); toast("Bin saved"); };
   $("#it-count").onclick = () => { S.sel.cat = it.category_id; S.sel.part = it.part_id; S.sel.size = it.size_id || null; store.set("cat", it.category_id); closePicker(); setTab("count"); renderForm(); focusQty(); };
   $("#it-label").onclick = () => saveLabel(it);
+  $("#it-move").onclick = () => openMove(it, t);
   $("#it-del").onclick = () => {
     const b = $("#it-del"), why = $("#it-delwhy");
     if (!b.dataset.armed) {
@@ -773,8 +817,7 @@ function openItem(id){
   });
 }
 
-async function saveLabel(it){
-  if (!S.downloads || !window.QRCode){ toast("The QR code tool didn't load. Check signal and reload.", null, null, true); return; }
+function labelCanvas(it){
   const holder = document.createElement("div");
   new QRCode(holder, { text: qrText(it.code), width: 360, height: 360, correctLevel: QRCode.CorrectLevel.M });
   const qc = holder.querySelector("canvas");
@@ -788,6 +831,11 @@ async function saveLabel(it){
   x.font = "500 40px 'IBM Plex Sans', sans-serif";
   if (it.size_id) x.fillText(sizeName(it.size_id), 445, 290);
   x.fillStyle = "#555"; x.font = "500 30px 'IBM Plex Sans', sans-serif"; x.fillText(catName(it.category_id).toUpperCase() + (it.bin ? "  ·  " + it.bin : ""), 445, 360);
+  return c;
+}
+async function saveLabel(it){
+  if (!S.downloads || !window.QRCode){ toast("The QR code tool didn't load. Check signal and reload.", null, null, true); return; }
+  const c = labelCanvas(it);
   const blob = await new Promise(r => c.toBlob(r, "image/png"));
   try { await S.downloads.save({ filename:`label-${it.code}.png`, data:blob }); toast("Label saved"); }
   catch (e) { if (e && e.code !== "declined") toast("Couldn't save the label.", null, null, true); }
@@ -805,7 +853,7 @@ function openExport(){
   sc.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ex-t"><div class="sh-hd"><h3 id="ex-t">Export<small>Spreadsheet files that open in Excel or Google Sheets</small></h3><button class="iconbtn" id="ex-x" type="button">Close</button></div>
   <div class="det"><div class="actions" style="flex-direction:column;align-items:stretch">
   <button class="btn primary" id="ex-stock" type="button">Stock totals (one row per item)</button>
-  <button class="btn" id="ex-log" type="button">Full count log (every entry)</button></div>
+  <button class="btn" id="ex-log" type="button">Full log (every entry, with who and when)</button></div>
   <p class="hint">Export now and then as a backup.</p></div></div>`;
   $("#ex-x").onclick = closePicker;
   $("#ex-stock").onclick = () => exportCsv("stock");
@@ -818,15 +866,151 @@ async function exportCsv(kind){
   let rows;
   if (kind === "stock"){
     const t = totals();
-    rows = [["Code","Category","Part","Size","Bin"].concat(locs.map(l => l.name), ["Total"])];
-    for (const it of S.items){ const o = t.get(it.id) || {}; const per = locs.map(l => o[l.id] || 0); rows.push([it.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), it.bin || ""].concat(per, [per.reduce((a,b)=>a+b,0)])); }
+    const last = new Map();
+    for (const m of S.moves) { const p = last.get(m.item_id); if (!p || (m.ts || 0) > (p.ts || 0)) last.set(m.item_id, m); }
+    rows = [["Code","Category","Part","Size","Bin"].concat(locs.map(l => l.name), ["Total","Last entry","Last entry by"])];
+    for (const it of S.items){ const o = t.get(it.id) || {}; const per = locs.map(l => o[l.id] || 0); const lm = last.get(it.id); rows.push([it.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), it.bin || ""].concat(per, [per.reduce((a,b)=>a+b,0), lm ? stamp(lm) : "", lm ? initialsOf(lm.by) : ""])); }
   } else {
-    rows = [["Date","Code","Category","Part","Size","Location","Bin","Qty","Type","Note"]];
-    for (const m of S.moves.slice().sort((a,b) => (a.ts||0)-(b.ts||0))){ const it = find(S.items, m.item_id) || {}; rows.push([m.at, it.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), locName(m.location_id), m.bin, m.qty, m.type, m.note]); }
+    rows = [["Date","Code","Category","Part","Size","Location","Bin","Qty","Type","Note","By","By name"]];
+    for (const m of S.moves.slice().sort((a,b) => (a.ts||0)-(b.ts||0))){ const it = find(S.items, m.item_id) || {}; rows.push([stamp(m), it.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), locName(m.location_id), m.bin, m.qty, typeName(m.type), m.note, initialsOf(m.by), nameOf(m.by)]); }
   }
   const csv = "﻿" + rows.map(r => r.map(csvCell).join(",")).join("\r\n");
   try { await S.downloads.save({ filename:`race-inventory-${kind}-${d}.csv`, data:csv }); closePicker(); toast("Exported"); }
   catch (e) { if (e && e.code !== "declined") toast("Export didn't save. Try again.", null, null, true); }
+}
+
+/* ---------- move between locations ---------- */
+function openMove(it, t){
+  const box = $("#it-movebox"); box.hidden = !box.hidden; if (box.hidden) return;
+  const locs = S.locs.slice().sort((a,b) => (a.sort ?? 999) - (b.sort ?? 999) || byName(a,b));
+  const have = l => (t && t[l]) || 0;
+  const from = locs.slice().sort((a,b) => have(b.id) - have(a.id))[0] || locs[0];
+  const to = locs.find(l => l.id !== (from && from.id)) || locs[0];
+  const opts = sel => locs.map(l => `<option value="${esc(l.id)}" ${l.id === sel ? "selected" : ""}>${esc(l.name)} (${have(l.id)})</option>`).join("");
+  $("#mv-from").innerHTML = opts(from && from.id); $("#mv-to").innerHTML = opts(to && to.id);
+  const q = $("#mv-qty"), err = $("#mv-err");
+  const sync = () => { const h = have($("#mv-from").value); $("#mv-have").textContent = `(${h} in ${locName($("#mv-from").value)})`; };
+  q.value = String(Math.min(1, have(from && from.id)) || 1); sync();
+  $("#mv-from").onchange = sync;
+  q.oninput = () => { q.value = q.value.replace(/[^0-9]/g, "").slice(0, 5); };
+  $("#mv-minus").onclick = () => { q.value = String(Math.max(1, (parseInt(q.value, 10) || 1) - 1)); };
+  $("#mv-plus").onclick = () => { q.value = String((parseInt(q.value, 10) || 0) + 1); };
+  $("#mv-go").onclick = () => {
+    err.textContent = "";
+    const f = $("#mv-from").value, d = $("#mv-to").value, n = parseInt(q.value, 10) || 0;
+    if (f === d) { err.textContent = "Pick two different locations."; return; }
+    if (n <= 0) { err.textContent = "Enter how many to move."; return; }
+    if (n > have(f)) { err.textContent = `Only ${have(f)} in ${locName(f)}.`; return; }
+    const db = S.db, now = Date.now(), tid = "T" + now.toString(36) + Math.random().toString(36).slice(2, 6);
+    const base = { item_id:it.id, type:"transfer", transfer_id:tid, note:`Moved ${locName(f)} → ${locName(d)}`, photo:null, by:S.uid, at:new Date(now).toISOString(), ts:now };
+    const out = db.collection("moves").doc(), inn = db.collection("moves").doc();
+    // both rows go out together so the totals never show half a move
+    write(() => Promise.all([
+      out.set(Object.assign({}, base, { qty:-n, location_id:f, bin:"" })),
+      inn.set(Object.assign({}, base, { qty:n, location_id:d, bin:"" })),
+    ]), "the move");
+    toast(`Moved ${n} to ${locName(d)}`, "Undo", () => undoMove(out.id));
+    openItem(it.id);
+  };
+  setTimeout(() => box.scrollIntoView({ block:"nearest", behavior:"smooth" }), 30);
+}
+
+/* ---------- scan a QR label ---------- */
+let scanStream = null, scanTimer = null;
+function stopScan(){ clearTimeout(scanTimer); scanTimer = null; if (scanStream) { scanStream.getTracks().forEach(tr => tr.stop()); scanStream = null; } }
+const codeFrom = text => { const v = String(text || "").trim(); const h = v.lastIndexOf("#"); return (h >= 0 ? v.slice(h + 1) : v).trim().toUpperCase(); };
+function openScan(){
+  closePicker();
+  const sc = $("#scrim"); sc.hidden = false;
+  sc.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sc-t">
+    <div class="sh-hd"><h3 id="sc-t">Scan a label<small>Point the camera at a bin's QR code</small></h3><button class="iconbtn" id="sc-x" type="button">Close</button></div>
+    <div class="det">
+      <div class="cam"><video id="sc-v" playsinline muted autoplay></video><div class="aim"></div></div>
+      <p class="scanmsg" id="sc-msg">Starting camera…</p>
+      <div class="manual"><input id="sc-code" placeholder="Or type a code, e.g. SUS-7K3Q" autocomplete="off" autocapitalize="characters" enterkeyhint="go"><button class="btn" id="sc-open" type="button">Open</button></div>
+    </div></div>`;
+  $("#sc-x").onclick = closePicker;
+  const openCode = c => { const code = codeFrom(c); const it = S.items.find(i => i.code === code); if (!it) return false; closePicker(); setTab("stock"); openItem(it.id); return true; };
+  $("#sc-open").onclick = () => { if (!openCode($("#sc-code").value)) $("#sc-msg").textContent = "No item with that code."; };
+  $("#sc-code").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); $("#sc-open").click(); } };
+  const msg = t => { const m = $("#sc-msg"); if (m) m.textContent = t; };
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { msg("This browser can't use the camera here. Type the code instead."); return; }
+  navigator.mediaDevices.getUserMedia({ video:{ facingMode:{ ideal:"environment" } }, audio:false }).then(stream => {
+    if ($("#scrim").hidden || !$("#sc-v")) { stream.getTracks().forEach(tr => tr.stop()); return; }
+    scanStream = stream;
+    const v = $("#sc-v"); v.srcObject = stream; v.play().catch(() => {});
+    msg("Looking for a QR code…");
+    const c = document.createElement("canvas"), x = c.getContext("2d", { willReadFrequently:true });
+    let lastMiss = "";
+    const tick = () => {
+      if (!scanStream) return;
+      if (v.readyState >= 2 && v.videoWidth) {
+        const w = Math.min(640, v.videoWidth), h = Math.round(v.videoHeight * w / v.videoWidth);
+        c.width = w; c.height = h; x.drawImage(v, 0, 0, w, h);
+        const r = window.jsQR ? window.jsQR(x.getImageData(0, 0, w, h).data, w, h, { inversionAttempts:"dontInvert" }) : null;
+        if (r && r.data) {
+          if (navigator.vibrate) navigator.vibrate(60);
+          if (openCode(r.data)) return;
+          const code = codeFrom(r.data);
+          if (code !== lastMiss) { lastMiss = code; msg(`No item with code ${code}. Try another label.`); }
+        }
+      }
+      scanTimer = setTimeout(tick, 140);
+    };
+    tick();
+  }).catch(() => msg("Camera is blocked. Allow camera access for this site in your browser settings, or type the code below."));
+}
+
+/* ---------- batch labels ---------- */
+function openLabels(){
+  const list = (S.shown || []).slice();
+  const sc = $("#scrim"); sc.hidden = false;
+  let fmt = store.get("labelfmt") || "roll";
+  const render = () => {
+    sc.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="lb-t">
+      <div class="sh-hd"><h3 id="lb-t">Print labels<small>${list.length ? `${plural(list.length, "label")} for the items showing in Stock` : "No items showing"}</small></h3><button class="iconbtn" id="lb-x" type="button">Close</button></div>
+      <div class="det" style="display:grid;gap:12px;padding-top:12px">
+        <p class="hint" style="padding:0">To narrow it down, close this and search Stock first, for example a category like <b>Suspension</b> or a bin like <b>Rack B</b>.</p>
+        <div class="fmt">
+          <button type="button" data-fmt="roll" aria-pressed="${fmt === "roll"}"><b>Label printer</b><span>One 3.5 × 1.5 in label per page (Brother, Zebra, Dymo)</span></button>
+          <button type="button" data-fmt="sheet" aria-pressed="${fmt === "sheet"}"><b>Letter sheets</b><span>Avery 5163 / 8163, 2 × 4 in, 10 per sheet</span></button>
+        </div>
+        <button class="go" id="lb-go" type="button" ${list.length ? "" : "disabled"}>Make PDF</button>
+        <div class="err" id="lb-err"></div>
+      </div></div>`;
+    $("#lb-x").onclick = closePicker;
+    sc.querySelectorAll("[data-fmt]").forEach(b => b.onclick = () => { fmt = b.dataset.fmt; store.set("labelfmt", fmt); render(); });
+    $("#lb-go").onclick = () => makeLabelPdf(list, fmt);
+  };
+  render();
+}
+async function makeLabelPdf(list, fmt){
+  const err = $("#lb-err"), go = $("#lb-go");
+  if (!window.jspdf || !window.QRCode) { err.textContent = "The label tools didn't load. Check signal and reload."; return; }
+  go.disabled = true; go.textContent = "Making…";
+  try {
+    const { jsPDF } = window.jspdf;
+    let doc;
+    if (fmt === "roll") {
+      doc = new jsPDF({ orientation:"landscape", unit:"in", format:[3.5, 1.5] });
+      list.forEach((it, i) => { if (i) doc.addPage([3.5, 1.5], "landscape"); doc.addImage(labelCanvas(it).toDataURL("image/png"), "PNG", 0, 0, 3.5, 1.5); });
+    } else {
+      // Avery 5163: 2 columns x 5 rows of 4 x 2 in labels on letter paper
+      doc = new jsPDF({ orientation:"portrait", unit:"in", format:"letter" });
+      const left = 0.156, top = 0.5, w = 4, h = 2, gap = 0.188, ih = w * 450 / 1050;
+      list.forEach((it, i) => {
+        const k = i % 10; if (i && !k) doc.addPage("letter", "portrait");
+        const col = k % 2, row = Math.floor(k / 2);
+        doc.addImage(labelCanvas(it).toDataURL("image/png"), "PNG", left + col * (w + gap), top + row * h + (h - ih) / 2, w, ih);
+      });
+    }
+    const blob = doc.output("blob");
+    await S.downloads.save({ filename:`labels-${new Date().toISOString().slice(0,10)}.pdf`, data:blob });
+    closePicker(); toast(`Made ${plural(list.length, "label")}`);
+  } catch (e) {
+    if (e && e.code === "declined") { go.disabled = false; go.textContent = "Make PDF"; return; }
+    err.textContent = "Couldn't make the PDF. Try fewer labels or reload."; go.disabled = false; go.textContent = "Make PDF";
+  }
 }
 
 /* ---------- tabs & wiring ---------- */
@@ -897,6 +1081,8 @@ $("#stock").addEventListener("click", e => { const b = e.target.closest("[data-i
 $("#locf").addEventListener("click", e => { const b = e.target.closest("[data-lf]"); if (b) { S.locFilter = b.dataset.lf; renderStock(); } });
 $("#q").oninput = () => { S.q = $("#q").value; renderStock(); };
 $("#b-export").onclick = openExport;
+$("#b-labels").onclick = openLabels;
+$("#scan").onclick = openScan;
 
 /* lock zoom: no pinch, no double-tap, no sideways drift */
 try { const vm = document.querySelector('meta[name="viewport"]'); if (vm) vm.setAttribute("content", "width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"); } catch {}
@@ -1011,7 +1197,7 @@ const photoStore = {
 };
 const fileSaver = {
   async save({ filename, data }){
-    const type = filename.endsWith(".csv") ? "text/csv" : filename.endsWith(".png") ? "image/png" : "application/octet-stream";
+    const type = filename.endsWith(".csv") ? "text/csv" : filename.endsWith(".png") ? "image/png" : filename.endsWith(".pdf") ? "application/pdf" : "application/octet-stream";
     const blob = data instanceof Blob ? data : new Blob([data], { type });
     if (/iP(hone|ad|od)/.test(navigator.userAgent) && navigator.canShare) {
       // iPhone: the share sheet lets you Save to Files, print, or AirDrop to a label printer
@@ -1195,6 +1381,8 @@ async function startApp(session){
   S.assets = me.role === "viewer" ? null : photoStore;
   S.downloads = fileSaver;
   S.db = makeDb(); syncUI();
+  // names for reports (who counted what); not shown on screen
+  sb.rpc("team_names").then(({ data }) => { S.names = Object.fromEntries((data || []).map(r => [r.id, r.full_name])); }).catch(() => {});
   if (me.role === "viewer") setTab("stock");
   const map = { categories:"cats", parts:"parts", sizes:"sizes", items:"items", moves:"moves", locations:"locs" };
   let opened = false;
