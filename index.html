@@ -10,6 +10,10 @@
 <meta name="apple-mobile-web-app-title" content="Race Inventory">
 <meta name="robots" content="noindex">
 <title>Race Shop Inventory</title>
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -20,7 +24,7 @@
 /* Layout: one-column counting tool. Sticky header + tabs, fields stacked like a setup sheet, Enter bar pinned to the bottom. */
 :root{
   --bg:#ECEFED; --surface:#FFFFFF; --sunk:#E1E5E3; --line:#C9CFCC;
-  --ink:#15181A; --muted:#596265; --accent:#F2C230; --accent-ink:#15181A;
+  --ink:#15181A; --muted:#596265; --accent:#D7232F; --accent-ink:#FFFFFF;
   --cobalt:#1D56C9; --good:#1E7547; --bad:#B3261E; --shadow:0 1px 0 rgba(21,24,26,.06),0 6px 20px rgba(21,24,26,.08);
   --f-display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;
   --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
@@ -28,11 +32,11 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#101315; --surface:#1A1E21; --sunk:#14181A; --line:#2E3438;
-  --ink:#E7EAEB; --muted:#98A1A5; --accent:#F2C230; --accent-ink:#15181A;
+  --ink:#E7EAEB; --muted:#98A1A5; --accent:#D7232F; --accent-ink:#FFFFFF;
   --cobalt:#86A9FF; --good:#4CC38A; --bad:#FF8075; --shadow:0 1px 0 rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.45); color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#101315; --surface:#1A1E21; --sunk:#14181A; --line:#2E3438;
-  --ink:#E7EAEB; --muted:#98A1A5; --accent:#F2C230; --accent-ink:#15181A;
+  --ink:#E7EAEB; --muted:#98A1A5; --accent:#D7232F; --accent-ink:#FFFFFF;
   --cobalt:#86A9FF; --good:#4CC38A; --bad:#FF8075; --shadow:0 1px 0 rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.45); color-scheme:dark }
 
 *{box-sizing:border-box}
@@ -89,6 +93,10 @@ button{cursor:pointer}
 header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
 .hd{display:flex;align-items:center;gap:12px;padding-block:10px 8px}
 .brand{font:700 22px/1 var(--f-display);letter-spacing:.02em;text-transform:uppercase;margin:0;flex:1;min-width:0}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .logo{width:38px;height:38px;flex:none;border-radius:9px;box-shadow:0 0 0 1px var(--line)}
+.brand .wm{display:block;transform:skewX(-8deg);font-size:19px;line-height:.98;font-weight:800;min-width:0;white-space:nowrap}
+.brand .wm b{display:block;color:var(--accent);font-weight:800}
 .brand small{display:block;font:500 11px/1.3 var(--f-body);letter-spacing:.08em;color:var(--muted);margin-top:3px}
 .sync{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap}
 .sync i{width:8px;height:8px;border-radius:50%;background:var(--good)}
@@ -269,12 +277,12 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
 </head>
 <body>
 
-<section class="auth" id="auth"><div class="auth-card" id="auth-card"><h1 class="brand">Race Shop Inventory<small>LOADING…</small></h1></div></section>
+<section class="auth" id="auth"><div class="auth-card" id="auth-card"><h1 class="brand"><img class="logo" src="icon.svg" alt=""><span class="wm">Race Shop<b>Inventory</b></span></h1><p style="margin:0">Loading…</p></div></section>
 
 <header>
   <div class="wrap">
     <div class="hd">
-      <h1 class="brand">Race Shop Inventory</h1>
+      <h1 class="brand"><img class="logo" src="icon.svg" alt=""><span class="wm">Race Shop<b>Inventory</b></span></h1>
       <div class="sync" id="sync" aria-live="polite"><i></i><span>Connecting</span></div>
       <button class="who" id="who" type="button" aria-label="Your account">?</button>
       <button class="scanbtn" id="scan" type="button" aria-label="Scan a QR label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M8 12h8"/></svg>Scan</button>
@@ -1328,7 +1336,7 @@ async function loadUsers(){
 /* ---------- sign-in screens ---------- */
 function showAuth(mode, note){
   const box = $("#auth"), card = $("#auth-card"); box.hidden = false;
-  const head = `<h1 class="brand">Race Shop Inventory</h1>`;
+  const head = `<h1 class="brand"><img class="logo" src="icon.svg" alt=""><span class="wm">Race Shop<b>Inventory</b></span></h1>`;
   if (mode === "setup") {
     card.innerHTML = head + `<form id="au-f" novalidate><h2>Set up the master admin</h2><p>First time here. This account controls who else can get in.</p>
       <label class="fld"><span>Your name</span><input id="au-name" autocomplete="name" required></label>

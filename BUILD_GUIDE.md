@@ -115,6 +115,12 @@ Seeded categories: Engine, Drivetrain, Chassis, Suspension, Steering, Brakes, Bo
 
 ---
 
+## 3a. Look and logo
+
+- **Colors:** red, white and black. Accent red `#D7232F` (white text on it), dark theme background `#101315`, light theme background `#ECEFED`. Errors and Delete also use red.
+- **Logo:** "Fast bins" — two red parts bins and a checkered top bin leaning forward with speed lines, on black. Files in the repo: `icon.svg` (rounded), `icon-square.svg` (full square), `apple-touch-icon.png` (180), `icon-192.png`, `icon-512.png`, `favicon-32.png`, `manifest.webmanifest` (home-screen name "Race Inv").
+- **Title:** logo + slanted two-line wordmark, "RACE SHOP" in white/black and "INVENTORY" in red.
+
 ## 4. Count screen rules (do not break these)
 
 Speed is the top requirement. Any change must keep these behaviors:
@@ -124,7 +130,7 @@ Speed is the top requirement. Any change must keep these behaviors:
 3. Near-duplicates are caught: matching ignores case, punctuation and plural "s" ("Camber shims" matches "Camber shim").
 4. Lists start empty (except categories and locations).
 5. Picking a category opens the part picker. Picking a part opens the size picker if that part has sizes or was just added; otherwise it jumps to quantity.
-6. Quantity uses the app's **own number pad** (1–9, 0, Clear, Back) that sits right above the Enter button. The top row of the pad shows the part being counted (left), the quantity being typed (center, large, gold outline) and **Close** (right). Keys act on press for instant response. The phone keyboard never opens for quantity, so it can't cover Enter. It appears after a part/size is picked or when the quantity box is tapped. Desktop keyboards can type digits and press Enter. The pad has a **Close** button at the top, and tapping anywhere else on the page also closes it.
+6. Quantity uses the app's **own number pad** (1–9, 0, Clear, Back) that sits right above the Enter button. The top row of the pad shows the part being counted (left), the quantity being typed (center, large, red outline) and **Close** (right). Keys act on press for instant response. The phone keyboard never opens for quantity, so it can't cover Enter. It appears after a part/size is picked or when the quantity box is tapped. Desktop keyboards can type digits and press Enter. The pad has a **Close** button at the top, and tapping anywhere else on the page also closes it.
 7. **ENTER** is a big button pinned to the bottom. It saves in the background, shows a toast with **Undo**, clears Part/Size/Quantity/Note/Photo, and reopens the part picker.
 8. **Category, Location and Bin stay set** between entries (you count one shelf at a time).
 9. Location defaults to **Shop**.
@@ -132,12 +138,12 @@ Speed is the top requirement. Any change must keep these behaviors:
 11. "Just counted" list shows the last 8 **count** entries with Undo (moves don't show there).
 12. Pickers have **Edit list** to rename and delete. Delete always works: first tap shows exactly what else goes with it (e.g. "Also removes 1 stock item, 3 count entries"), second tap confirms. Deleting a category removes its parts, sizes, stock and entries; deleting a part removes its sizes, stock and entries; deleting a size removes the stock items with that size. Locations that still hold stock can't be deleted (says why), and the last location can't be deleted.
 13. Status in the header shows "All saved" / "Saving…" / "Some saves failed" with Retry.
-14. Pickers have a gold outline and a dark blurred background so they stand out from the page.
+14. Pickers have a red outline and a dark blurred background so they stand out from the page.
 15. Zoom is locked: no pinch zoom, no double-tap zoom, no sideways panning. Every text box uses 16px+ text so iPhones don't auto-zoom when it's tapped.
 
 ## 5. Stock screen
 
-- **Scan** (yellow button in the header, every user level): opens the camera, reads a QR label and jumps to that item. Also has a box to type a code. Closing it turns the camera off. iPhone asks for camera permission the first time.
+- **Scan** (red button in the header, every user level): opens the camera, reads a QR label and jumps to that item. Also has a box to type a code. Closing it turns the camera off. iPhone asks for camera permission the first time.
 - **Labels** button: makes one PDF of QR labels for exactly the items currently showing (search or filter first, e.g. "Suspension" or "Rack B"). Two formats: **Label printer** (one 3.5 × 1.5 in label per page) or **Letter sheets** (Avery 5163/8163, 2 × 4 in, 10 per page). The choice is remembered.
 - Grouped by category, searchable by part, size, code or bin, filterable by location.
 - Tap an item: code, QR, qty per location, photo, home bin (editable), full history with delete, **Count more**, **Move** (Editor+: from/to location with on-hand counts, how many, blocks moving more than is there; saved as two linked `transfer` rows, −qty at From and +qty at To, sharing a `transfer_id`; Undo or deleting either row removes both), **Save QR label** (PNG, 1050×450, sized for 3.5×1.5 in labels), **Delete item** (two taps; removes the item and its entries from inventory, keeps the part name in the list).
@@ -221,6 +227,7 @@ The code is `index.html` in the `hititautosport/Race-inventory` GitHub repo; thi
 
 ## 11. Changelog
 
+- **2026-10-19** — New red/white/black theme (red replaces yellow everywhere), new "Fast bins" logo for the home screen, browser tab and header, slanted two-tone title. 54/54 test checks passed.
 - **2026-10-19** — Added Scan button (camera), Move between locations, batch label PDFs (label printer or Avery 5163 sheets), who-made-it initials and names in Excel exports (not shown in the app), readable dates in exports, and a twice-weekly keep-awake job so the free database never pauses. 54/54 test checks passed.
 - **2026-10-19** — Removed the "Chassis · Engines · Spares" subtitle under the title.
 - **2026-10-19** — v2: standalone app on GitHub Pages + Supabase. Email/password logins, user levels (No access, View only, Editor, Master admin) enforced in the database, Users screen, change own password, live updates between phones, photos in private Storage, QR codes are links that open the item, iPhone Share sheet for exports/labels. v1 data copied over. 48/48 test checks passed.
