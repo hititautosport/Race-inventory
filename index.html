@@ -245,7 +245,7 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
 <header>
   <div class="wrap">
     <div class="hd">
-      <h1 class="brand">Race Shop Inventory<small>CHASSIS · ENGINES · SPARES</small></h1>
+      <h1 class="brand">Race Shop Inventory</h1>
       <div class="sync" id="sync" aria-live="polite"><i></i><span>Connecting</span></div>
       <button class="who" id="who" type="button" aria-label="Your account">?</button>
     </div>
@@ -1142,7 +1142,7 @@ async function loadUsers(){
 /* ---------- sign-in screens ---------- */
 function showAuth(mode, note){
   const box = $("#auth"), card = $("#auth-card"); box.hidden = false;
-  const head = `<h1 class="brand">Race Shop Inventory<small>CHASSIS · ENGINES · SPARES</small></h1>`;
+  const head = `<h1 class="brand">Race Shop Inventory</h1>`;
   if (mode === "setup") {
     card.innerHTML = head + `<form id="au-f" novalidate><h2>Set up the master admin</h2><p>First time here. This account controls who else can get in.</p>
       <label class="fld"><span>Your name</span><input id="au-name" autocomplete="name" required></label>
