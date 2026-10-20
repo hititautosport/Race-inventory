@@ -137,7 +137,8 @@ Speed is the top requirement. Any change must keep these behaviors:
 10. Same item counted twice (e.g. two bins) adds up; it never overwrites.
 11. "Just counted" list shows the last 8 **count** entries with Undo (moves don't show there).
 12. Pickers have **Edit list** to rename and delete. Delete always works: first tap shows exactly what else goes with it (e.g. "Also removes 1 stock item, 3 count entries"), second tap confirms. Deleting a category removes its parts, sizes, stock and entries; deleting a part removes its sizes, stock and entries; deleting a size removes the stock items with that size. Locations that still hold stock can't be deleted (says why), and the last location can't be deleted.
-13. Status in the header shows "All saved" / "Saving…" / "Some saves failed" with Retry.
+13. Save status in the header is **hidden when everything is saved**. A small grey blinking dot shows while saving. A red **Not saved** pill appears only if a save failed (tap it for help; the error message has Retry).
+16. **Saves go out one at a time, in order.** A new part/item always reaches the database before the count that points at it. (Before 2026-10-19 21:10 a new item and its first count were sent together and the count could arrive first and be rejected by the database's link check.)
 14. Pickers have a red outline and a dark blurred background so they stand out from the page.
 15. Zoom is locked: no pinch zoom, no double-tap zoom, no sideways panning. Every text box uses 16px+ text so iPhones don't auto-zoom when it's tapped.
 
@@ -147,7 +148,14 @@ Speed is the top requirement. Any change must keep these behaviors:
 - **Labels** button: makes one PDF of QR labels for exactly the items currently showing (search or filter first, e.g. "Suspension" or "Rack B"). Two formats: **Label printer** (one 3.5 × 1.5 in label per page) or **Letter sheets** (Avery 5163/8163, 2 × 4 in, 10 per page). The choice is remembered.
 - Grouped by category, searchable by part, size, code or bin, filterable by location.
 - Tap an item: code, QR, qty per location, photo, home bin (editable), full history with delete, **Count more**, **Move** (Editor+: from/to location with on-hand counts, how many, blocks moving more than is there; saved as two linked `transfer` rows, −qty at From and +qty at To, sharing a `transfer_id`; Undo or deleting either row removes both), **Save QR label** (PNG, 1050×450, sized for 3.5×1.5 in labels), **Delete item** (two taps; removes the item and its entries from inventory, keeps the part name in the list).
-- **Export:** stock totals CSV (one row per item, a column per location) and full count log CSV.
+- Exports and label printing are in the **Menu** (section 5a).
+
+## 5a. Menu (tap your initials, top right)
+
+- **Reports:** Stock totals (Excel), Full log (Excel), Print QR labels (opens Labels for whatever Stock is showing).
+- **Settings on this phone:** Theme (Auto / Light / Dark), "Open the part list after Enter" (on by default; Editors+ only). Saved per phone.
+- **Team** (Master admin): Manage users.
+- **Account:** Change my password, Sign out. App version at the bottom (currently 2.3).
 
 ## 6. QR / label rules
 
@@ -213,7 +221,7 @@ Phase 4 tables still to add: `tracks (id, name, track_type)`, `kits (id, name, t
 
 ## 9. Testing
 
-After every change, run a full tap-through test on a phone-sized touch screen with a stand-in for Supabase that enforces the same permission rules: first-admin setup, sign in (wrong and right password), every picker, Add new, Edit list rename/delete, number pad keys (fast double taps, Back, Clear, Close, tap-outside), +/−, bin, note, photo, Enter, both Undos, Stock search and filters, item sheet (QR link, bin, label, Count more, history delete, Delete item), Export, Users screen (add, duplicate email, change level, last-admin guard, reset password, remove), change own password, sign out, View only and Editor restrictions, No access screen, opening a QR link, light and dark theme, no sideways scrolling, no script errors. Also: Scan (camera finds a label, unknown code, typed code, camera stops on Close), Move (over-limit blocked, both rows written and linked, Undo and history delete remove both, not in Just counted), label PDFs in both formats for exactly what Stock shows, export columns for who and when. The latest run passed 54/54 checks.
+After every change, run a full tap-through test on a phone-sized touch screen with a stand-in for Supabase that enforces the same permission rules: first-admin setup, sign in (wrong and right password), every picker, Add new, Edit list rename/delete, number pad keys (fast double taps, Back, Clear, Close, tap-outside), +/−, bin, note, photo, Enter, both Undos, Stock search and filters, item sheet (QR link, bin, label, Count more, history delete, Delete item), Export, Users screen (add, duplicate email, change level, last-admin guard, reset password, remove), change own password, sign out, View only and Editor restrictions, No access screen, opening a QR link, light and dark theme, no sideways scrolling, no script errors. Also: Scan (camera finds a label, unknown code, typed code, camera stops on Close), Move (over-limit blocked, both rows written and linked, Undo and history delete remove both, not in Just counted), label PDFs in both formats for exactly what Stock shows, export columns for who and when. Also: saves arrive in order (the stand-in database enforces the same links between tables and answers in random order like a phone connection), status hidden when saved, Menu reports/theme/setting. The latest run passed 56/56 checks. Proven: the version before this fix lost 5 of 6 rapid new-item counts in the same test; the fixed version saved 6 of 6.
 
 ## 10. How to continue in a new chat
 
@@ -227,6 +235,7 @@ The code is `index.html` in the `hititautosport/Race-inventory` GitHub repo; thi
 
 ## 11. Changelog
 
+- **2026-10-19** — v2.3: fixed lost counts on brand-new items (saves now go in order); status dot hidden unless saving or failed; Export moved into a new Menu under your initials with Reports, Theme, part-list setting, users, password, sign out and version. 56/56 checks passed.
 - **2026-10-19** — New red/white/black theme (red replaces yellow everywhere), new "Fast bins" logo for the home screen, browser tab and header, slanted two-tone title. 54/54 test checks passed.
 - **2026-10-19** — Added Scan button (camera), Move between locations, batch label PDFs (label printer or Avery 5163 sheets), who-made-it initials and names in Excel exports (not shown in the app), readable dates in exports, and a twice-weekly keep-awake job so the free database never pauses. 54/54 test checks passed.
 - **2026-10-19** — Removed the "Chassis · Engines · Spares" subtitle under the title.

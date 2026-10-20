@@ -98,10 +98,13 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:va
 .brand .wm{display:block;transform:skewX(-8deg);font-size:19px;line-height:.98;font-weight:800;min-width:0;white-space:nowrap}
 .brand .wm b{display:block;color:var(--accent);font-weight:800}
 .brand small{display:block;font:500 11px/1.3 var(--f-body);letter-spacing:.08em;color:var(--muted);margin-top:3px}
-.sync{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap}
-.sync i{width:8px;height:8px;border-radius:50%;background:var(--good)}
-.sync.busy i{background:var(--accent)}
-.sync.err i{background:var(--bad)}
+.sync{display:none;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap;border:0;background:transparent;padding:0}
+.sync i{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.sync.busy{display:flex}
+.sync.busy i{animation:blink 1s ease-in-out infinite}
+.sync.err{display:flex;color:#fff;background:var(--bad);border-radius:999px;padding:6px 10px}
+.sync.err i{background:#fff}
+@keyframes blink{50%{opacity:.25}}
 .tabs{display:flex;gap:4px;padding-bottom:8px}
 .tab{flex:1;border:1px solid var(--line);background:var(--sunk);border-radius:8px;padding:8px 10px;font:600 16px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .tab[aria-selected="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
@@ -180,7 +183,7 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
 .grp{font:700 15px/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:16px 2px 6px;display:flex;justify-content:space-between}
 
 /* stock toolbar */
-.tools{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-bottom:8px}
+.tools{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px}
 .search{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:0 12px;min-width:0}
 .search svg{width:18px;height:18px;color:var(--muted);flex:none}
 .search input{border:0;background:transparent;height:44px;width:100%;min-width:0;outline:0}
@@ -250,7 +253,7 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
 /* scan */
 .scanbtn{flex:none;height:38px;display:inline-flex;align-items:center;gap:6px;padding:0 12px;border-radius:999px;border:2px solid var(--accent);background:var(--accent);color:var(--accent-ink);font:700 16px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercase}
 .scanbtn svg{width:18px;height:18px}
-@media (max-width:440px){ .sync span{display:none} .sync{padding:6px} }
+@media (max-width:440px){ .sync.busy span{display:none} }
 .cam{position:relative;background:#000;border-radius:16px;overflow:hidden;aspect-ratio:3/4;max-height:52vh;margin:12px auto 0;width:100%}
 .cam video{width:100%;height:100%;object-fit:cover;display:block}
 .cam .aim{position:absolute;inset:18%;border:3px solid var(--accent);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
@@ -266,6 +269,22 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
 .movebox .stepper input{height:56px;width:100%;min-width:0;text-align:center;border:2px solid var(--line);border-radius:12px;background:var(--surface);font:700 30px/1 var(--f-display);font-variant-numeric:tabular-nums;color:var(--ink)}
 .movebox .lbl2{font:600 11px/1.2 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .movebox .fld{display:grid;gap:6px}
+
+/* menu */
+.mgroup{display:grid;gap:8px;padding:14px 0;border-bottom:1px solid var(--line)}
+.mgroup:last-child{border-bottom:0}
+.mgroup h4{margin:0;font:600 11px/1.2 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.mitem{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:13px 14px;font-weight:600}
+.mitem small{display:block;font-weight:400;color:var(--muted);font-size:13px;margin-top:2px}
+.mitem .chev{color:var(--muted)}
+.seg3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg3 button{height:42px;border:1.5px solid var(--line);background:var(--sunk);border-radius:12px;font-weight:600}
+.seg3 button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.switch{position:relative;width:52px;height:30px;flex:none;border-radius:999px;background:var(--line);border:0;transition:background .15s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.switch[aria-checked="true"]{background:var(--accent)}
+.switch[aria-checked="true"]::after{transform:translateX(22px)}
+.ver{font-size:12px;color:var(--muted);text-align:center;padding-top:10px}
 
 /* labels */
 .fmt{display:grid;gap:8px}
@@ -283,8 +302,8 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
   <div class="wrap">
     <div class="hd">
       <h1 class="brand"><img class="logo" src="icon.svg" alt=""><span class="wm">Race Shop<b>Inventory</b></span></h1>
-      <div class="sync" id="sync" aria-live="polite"><i></i><span>Connecting</span></div>
-      <button class="who" id="who" type="button" aria-label="Your account">?</button>
+      <button class="sync" id="sync" type="button" aria-live="polite"><i></i><span>Connecting</span></button>
+      <button class="who" id="who" type="button" aria-label="Menu">?</button>
       <button class="scanbtn" id="scan" type="button" aria-label="Scan a QR label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M8 12h8"/></svg>Scan</button>
     </div>
     <div class="tabs" role="tablist">
@@ -332,7 +351,6 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
     <div class="tools">
       <label class="search" for="q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg><input id="q" placeholder="Search part, size, code, bin" autocomplete="off"></label>
       <button class="btn" id="b-labels" type="button">Labels</button>
-      <button class="btn" id="b-export" type="button">Export</button>
     </div>
     <div class="seg" id="locf"></div>
     <div class="sum" id="sum"></div>
@@ -377,6 +395,10 @@ const S = {
   pendingItems:new Map(), deleting:new Set(),
 };
 
+/* ---------- theme (Auto follows the phone) ---------- */
+function applyTheme(v){ const r = document.documentElement; if (v === "light" || v === "dark") r.dataset.theme = v; else delete r.dataset.theme; }
+applyTheme(store.get("theme"));
+
 /* ---------- lookups ---------- */
 const find = (arr,id) => arr.find(x => x.id === id);
 const catName = id => find(S.cats,id)?.name || "Uncategorized";
@@ -399,8 +421,9 @@ function syncUI(){
   const el = $("#sync"), sp = el.querySelector("span");
   el.classList.toggle("busy", S.inflight > 0);
   el.classList.toggle("err", S.failed > 0 && S.inflight === 0);
-  if (!S.db) { sp.textContent = "Not connected"; el.classList.add("err"); return; }
-  sp.textContent = S.inflight > 0 ? `Saving ${S.inflight}…` : S.failed > 0 ? "Some saves failed" : "All saved";
+  if (!S.db) { sp.textContent = "Not connected"; return; }
+  sp.textContent = S.inflight > 0 ? "Saving…" : S.failed > 0 ? "Not saved" : "All saved";
+  el.title = S.failed > 0 ? "Some changes didn't save. Tap Retry on the message, or check your signal." : "";
 }
 function write(promiseFn, label){
   S.inflight++; syncUI();
@@ -514,7 +537,7 @@ function enter(){
   S.sel.part = null; S.sel.size = null; S.qtyActive = false; setQty(""); keypadUI(); $("#note").value = ""; $("#note").hidden = true; $("#b-note").classList.remove("on");
   clearPhoto();
   renderAll();
-  openPartPicker();
+  if (store.get("autonext") !== false) openPartPicker();
 }
 function undoMove(id){
   const db = S.db, m = find(S.moves, id);
@@ -1088,7 +1111,6 @@ $("#recent").addEventListener("click", e => { const b = e.target.closest("[data-
 $("#stock").addEventListener("click", e => { const b = e.target.closest("[data-item]"); if (b) openItem(b.dataset.item); });
 $("#locf").addEventListener("click", e => { const b = e.target.closest("[data-lf]"); if (b) { S.locFilter = b.dataset.lf; renderStock(); } });
 $("#q").oninput = () => { S.q = $("#q").value; renderStock(); };
-$("#b-export").onclick = openExport;
 $("#b-labels").onclick = openLabels;
 $("#scan").onclick = openScan;
 
@@ -1145,6 +1167,10 @@ function makeDb(){
   const drop = (t, id) => { if (cache[t]) cache[t].delete(id); emit(t); };
   const clean = d => { const o = {}; for (const [k, v] of Object.entries(d)) if (!k.startsWith("_") && v !== undefined) o[k] = v; return o; };
   const denied = () => ({ code:"42501", message:"not allowed" });
+  // Every save waits for the one before it. A new item always reaches the database
+  // before the count that points at it, even on a slow phone connection.
+  let chain = Promise.resolve();
+  const inOrder = fn => { const p = chain.then(fn, fn); chain = p.catch(() => {}); return p; };
   const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(12)), b => (b % 36).toString(36)).join("");
   function doc(path){
     const [t, id] = path.split("/");
@@ -1152,17 +1178,17 @@ function makeDb(){
       id, path,
       async set(data){
         const row = Object.assign(clean(data), { id }); put(t, row);
-        const { error } = await sb.from(t).upsert(row);
+        const { error } = await inOrder(() => sb.from(t).upsert(row));
         if (error){ refresh(t).catch(() => {}); throw error; }
       },
       async update(data){
         const ch = clean(data); put(t, Object.assign({ id }, ch));
-        const { data: got, error } = await sb.from(t).update(ch).eq("id", id).select("id");
+        const { data: got, error } = await inOrder(() => sb.from(t).update(ch).eq("id", id).select("id"));
         if (error || !got.length){ refresh(t).catch(() => {}); throw error || denied(); }
       },
       async delete(){
         const old = cache[t] && cache[t].get(id); drop(t, id);
-        const { data: got, error } = await sb.from(t).delete().eq("id", id).select("id");
+        const { data: got, error } = await inOrder(() => sb.from(t).delete().eq("id", id).select("id"));
         if (error){ if (old) put(t, old); throw error; }
         if (!got.length){
           // nothing removed: either already gone (fine) or not allowed
@@ -1235,19 +1261,42 @@ async function callUsers(body){
 const initials = n => (String(n || "").trim().split(/\s+/).map(w => w[0]).join("").slice(0, 2) || "?").toUpperCase();
 const makePassword = () => { const a = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"; return Array.from(crypto.getRandomValues(new Uint8Array(10)), b => a[b % a.length]).join(""); };
 
+const APP_VERSION = "2.3 · Oct 19, 2026";
 function openAccount(){
   const me = S.me || {};
   const sc = $("#scrim"); sc.hidden = false;
+  const th = store.get("theme") || "auto", auto = store.get("autonext") !== false;
+  const chev = '<span class="chev">›</span>';
   sc.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ac-t">
-    <div class="sh-hd"><h3 id="ac-t">${esc(me.full_name || "Your account")}<small>${esc(me.email || "")} · ${esc(LEVELS[S.role] || "")}</small></h3><button class="iconbtn" id="ac-x" type="button">Close</button></div>
-    <div class="det"><div class="actions" style="flex-direction:column;align-items:stretch">
-      ${S.role === "admin" ? `<button class="btn primary" id="ac-users" type="button">Manage users</button>` : ""}
-      <button class="btn" id="ac-pw" type="button">Change my password</button>
-      <div id="ac-pwbox" hidden><div class="pwrow"><input id="ac-newpw" type="password" placeholder="New password (8+ characters)" autocomplete="new-password"><button class="btn" id="ac-pwsave" type="button">Save</button></div><div class="err" id="ac-err"></div></div>
-      <button class="btn danger" id="ac-out" type="button">Sign out</button>
-    </div>
-    <p class="hint">Tip: add this page to your home screen (Share, then Add to Home Screen) so it opens like an app.</p></div></div>`;
+    <div class="sh-hd"><h3 id="ac-t">${esc(me.full_name || "Menu")}<small>${esc(me.email || "")} · ${esc(LEVELS[S.role] || "")}</small></h3><button class="iconbtn" id="ac-x" type="button">Close</button></div>
+    <div class="det">
+      <div class="mgroup"><h4>Reports</h4>
+        <button class="mitem" id="ex-stock" type="button"><span>Stock totals<small>Excel: every item, count per location, last entry and who</small></span>${chev}</button>
+        <button class="mitem" id="ex-log" type="button"><span>Full log<small>Excel: every count and move, with date, time and who</small></span>${chev}</button>
+        <button class="mitem" id="mn-labels" type="button"><span>Print QR labels<small>PDF for whatever the Stock tab is showing</small></span>${chev}</button>
+      </div>
+      <div class="mgroup"><h4>Settings on this phone</h4>
+        <div class="seg3" role="group" aria-label="Theme">${[["auto","Auto"],["light","Light"],["dark","Dark"]].map(([k,v]) => `<button type="button" data-th="${k}" aria-pressed="${th === k}">${v}</button>`).join("")}</div>
+        <div class="mitem need-edit" style="cursor:default"><span>Open the part list after Enter<small>Faster counting. Turn off to stay on the form.</small></span><button class="switch" id="mn-auto" type="button" role="switch" aria-checked="${auto}" aria-label="Open the part list after Enter"></button></div>
+      </div>
+      ${S.role === "admin" ? `<div class="mgroup"><h4>Team</h4><button class="mitem" id="ac-users" type="button"><span>Manage users<small>Add people, set their level, reset passwords</small></span>${chev}</button></div>` : ""}
+      <div class="mgroup"><h4>Account</h4>
+        <button class="mitem" id="ac-pw" type="button"><span>Change my password</span>${chev}</button>
+        <div id="ac-pwbox" hidden><div class="pwrow"><input id="ac-newpw" type="password" placeholder="New password (8+ characters)" autocomplete="new-password"><button class="btn" id="ac-pwsave" type="button">Save</button></div><div class="err" id="ac-err"></div></div>
+        <button class="btn danger" id="ac-out" type="button">Sign out</button>
+      </div>
+      <p class="hint">Tip: add this page to your home screen (Share, then Add to Home Screen) so it opens like an app.</p>
+      <div class="ver">Race Shop Inventory ${APP_VERSION}</div>
+    </div></div>`;
   $("#ac-x").onclick = closePicker;
+  $("#ex-stock").onclick = () => exportCsv("stock");
+  $("#ex-log").onclick = () => exportCsv("log");
+  $("#mn-labels").onclick = () => { closePicker(); setTab("stock"); renderStock(); openLabels(); };
+  sc.querySelectorAll("[data-th]").forEach(b => b.onclick = () => {
+    store.set("theme", b.dataset.th); applyTheme(b.dataset.th);
+    sc.querySelectorAll("[data-th]").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  });
+  $("#mn-auto").onclick = e => { const on = e.currentTarget.getAttribute("aria-checked") !== "true"; e.currentTarget.setAttribute("aria-checked", String(on)); store.set("autonext", on); };
   if ($("#ac-users")) $("#ac-users").onclick = openUsers;
   $("#ac-pw").onclick = () => { $("#ac-pwbox").hidden = false; $("#ac-newpw").focus(); };
   $("#ac-pwsave").onclick = async () => {
@@ -1259,6 +1308,7 @@ function openAccount(){
   };
   $("#ac-out").onclick = async () => { await sb.auth.signOut(); location.reload(); };
 }
+$("#sync").onclick = () => { if (S.failed > 0) toast("Some changes didn't save. Check your signal, then tap Retry on the message that appears, or reload.", "Reload", () => location.reload(), true); };
 
 async function openUsers(){
   const sc = $("#scrim"); sc.hidden = false;
