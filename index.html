@@ -161,6 +161,11 @@ body.kp main{padding-bottom:420px}
 
 /* enter bar */
 .enterbar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding-top:10px;padding-bottom:max(10px, calc(env(safe-area-inset-bottom,0px) - 12px))}
+.entrow{display:grid;grid-template-columns:84px 1fr;gap:10px}
+.camgo{height:60px;border-radius:12px;border:2px solid var(--accent);background:var(--surface);color:var(--accent);display:grid;place-items:center;align-content:center;gap:2px;font:700 12px/1 var(--f-body);letter-spacing:.06em;text-transform:uppercase}
+.camgo svg{width:28px;height:28px}
+.camgo:disabled{border-color:var(--line);color:var(--muted);background:var(--sunk)}
+.camgo.busy svg{animation:blink 1s ease-in-out infinite}
 .enter{width:100%;height:60px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font:700 26px/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;box-shadow:0 2px 0 rgba(0,0,0,.25)}
 .enter:disabled{background:var(--sunk);color:var(--muted);box-shadow:none;cursor:not-allowed}
 .enter small{display:block;font:500 12px/1.2 var(--f-body);letter-spacing:.02em;text-transform:none;margin-top:3px;opacity:.8}
@@ -399,7 +404,10 @@ body.qe main{padding-bottom:110px}
     <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
     <button type="button" data-k="clear" class="fn">Clear</button><button type="button" data-k="0">0</button><button type="button" data-k="back" class="fn" aria-label="Backspace">⌫ Back</button>
   </div>
-  <button class="enter" id="enter" type="button" disabled>Enter<small id="enter-s">Pick a category and part</small></button></div></div>
+  <div class="entrow">
+    <button class="camgo" id="cam-go" type="button" disabled aria-label="Take a photo and save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>Photo</span></button>
+    <button class="enter" id="enter" type="button" disabled>Enter<small id="enter-s">Pick a category and part</small></button>
+  </div></div></div>
 
 <div class="scrim" id="scrim" hidden></div>
 <div class="toast" id="toast" hidden></div>
@@ -520,6 +528,8 @@ function renderForm(){
   else if (qtyVal() <= 0) why = "Enter a quantity";
   else if (S.photo && S.photo.uploading) why = "Uploading photo…";
   btn.disabled = !!why;
+  const cam = $("#cam-go");
+  if (cam) { cam.hidden = !S.assets; cam.disabled = !!why; cam.classList.toggle("busy", !!(S.photo && S.photo.uploading)); }
   s.textContent = why || `${qtyVal()} × ${p?.name || ""}${z ? " " + z.name : ""} → ${locName(S.sel.loc)}`;
 }
 function setVal(sel, v, ph){ const el = $(sel); el.textContent = v || ph; el.classList.toggle("ph", !v); }
@@ -622,7 +632,9 @@ async function onPhoto(file){
     S.photo = { id:r.id, url:r.url, uploading:false };
     $("#thumb-s").textContent = `${(r.sizeBytes/1024).toFixed(0)} KB, attached`;
     $("#photo-l").textContent = "Retake"; $("#b-photo").classList.add("on");
+    if (S.camAuto) { S.camAuto = false; renderForm(); enter(); return; }
   } catch (e) {
+    S.camAuto = false;
     clearPhoto();
     toast(e && e.code === "too_large" ? "That photo is too large." : "Photo didn't upload. Try again.", null, null, true);
   }
@@ -1440,7 +1452,9 @@ document.addEventListener("keydown", e => {
 $("#enter").onclick = enter;
 $("#b-note").onclick = () => { const n = $("#note"); n.hidden = !n.hidden; $("#b-note").classList.toggle("on", !n.hidden); if (!n.hidden) n.focus(); };
 $("#note").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); $("#note").blur(); } };
-$("#b-photo").onclick = () => $("#photo-in").click();
+$("#b-photo").onclick = () => { S.camAuto = false; $("#photo-in").click(); };
+// camera button: take a photo, then the entry saves with it (Enter saves without one)
+$("#cam-go").onclick = () => { if ($("#enter").disabled) return; S.camAuto = true; $("#photo-in").click(); };
 $("#photo-in").onchange = e => onPhoto(e.target.files[0]);
 $("#thumb-x").onclick = () => { clearPhoto(); renderForm(); };
 document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("#recent [data-undo]"); if (b) { undoMove(b.dataset.undo); toast("Entry removed"); } });
