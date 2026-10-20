@@ -225,7 +225,7 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
 .opt.add{background:transparent;border-style:dashed;border-color:var(--cobalt);color:var(--cobalt)}
 .opt.add svg{width:18px;height:18px;flex:none}
 .opt.none{background:transparent;color:var(--muted)}
-.edrow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.edrow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
 .edrow input{height:42px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:0 10px;min-width:0;width:100%}
 .edrow .why{grid-column:1/-1;font-size:13px;color:var(--muted)}
 .edrow .why.bad{color:var(--bad);font-weight:600}
@@ -310,6 +310,30 @@ body.qe main{padding-bottom:110px}
 .imp li{margin:3px 0}
 .imp .num{font:700 22px/1 var(--f-display)}
 
+/* serialized units */
+.duetag{font:700 10.5px/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--bad);border-radius:999px;padding:4px 7px}
+.ustat{font:600 10.5px/1 var(--f-body);letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:4px 7px;background:var(--sunk);color:var(--muted)}
+.ustat.ready{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good)}
+.ustat.needs_work{background:color-mix(in srgb,#E8A33D 22%,transparent);color:#C47F12}
+.ustat.wrecked{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad)}
+.ugrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.ubox{background:var(--sunk);border-radius:12px;padding:10px 12px}
+.ubox span{display:block;font:600 10.5px/1.2 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ubox b{display:block;font:700 22px/1.1 var(--f-display);font-variant-numeric:tabular-nums;margin-top:4px}
+.ubox small{color:var(--muted)}
+.ltypes{display:flex;flex-wrap:wrap;gap:6px}
+.ltypes button{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 12px;font-weight:600}
+.ltypes button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.lgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.ufld{display:grid;gap:4px}
+.ufld span{font:600 10.5px/1.2 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ufld input,.ufld select,.ufld textarea{height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:0 10px;width:100%;min-width:0;color:var(--ink)}
+.ufld textarea{height:70px;padding:8px 10px;resize:vertical;font:inherit}
+.files{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.files a{font-size:13px;font-weight:600;color:var(--cobalt);border:1px solid var(--line);border-radius:999px;padding:4px 10px;text-decoration:none}
+.serialin{height:56px;width:100%;min-width:0;border-radius:12px;border:2px solid var(--line);background:var(--surface);padding:0 14px;font:700 24px/1 var(--f-mono);letter-spacing:.04em;text-transform:uppercase;color:var(--ink)}
+.serialin:focus{border-color:var(--ink);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 45%,transparent)}
+
 /* menu */
 .mgroup{display:grid;gap:8px;padding:14px 0;border-bottom:1px solid var(--line)}
 .mgroup:last-child{border-bottom:0}
@@ -361,7 +385,11 @@ body.qe main{padding-bottom:110px}
       <button class="field" id="f-cat" type="button"><span class="lbl">Category</span><span class="val ph" id="cat-v">Choose or add</span><span class="chev">›</span></button>
       <button class="field" id="f-part" type="button"><span class="lbl">Part</span><span class="val ph" id="part-v">Choose or add</span><span class="chev">›</span></button>
       <button class="field" id="f-size" type="button"><span class="lbl">Size / spec</span><span class="val ph" id="size-v">Optional</span><span class="chev">›</span></button>
-      <div class="qtyrow">
+      <div class="qtyrow" id="serialrow" hidden>
+        <span class="lbl" style="font:600 11px/1.2 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Serial #</span>
+        <input id="serial" class="serialin" placeholder="Type the serial" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="go" aria-label="Serial number">
+      </div>
+      <div class="qtyrow" id="qtyrow">
         <span class="lbl" style="font:600 11px/1.2 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">Quantity</span>
         <div class="stepper">
           <button type="button" id="q-minus" aria-label="Minus one">−</button>
@@ -426,7 +454,7 @@ const ICON_PLUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 
 const S = {
   db:null, assets:null, downloads:null, uid:null,
-  cats:[], parts:[], sizes:[], items:[], moves:[], locs:[],
+  cats:[], parts:[], sizes:[], items:[], moves:[], locs:[], units:[], ulog:[],
   loaded:new Set(),
   sel:{ cat: store.get("cat"), part:null, size:null, loc: store.get("loc") },
   bin: store.get("bin") || "",
@@ -452,6 +480,11 @@ function totals(){
   for (const m of S.moves){
     if (!t.has(m.item_id)) t.set(m.item_id, {});
     const o = t.get(m.item_id); o[m.location_id] = (o[m.location_id]||0) + (Number(m.qty)||0);
+  }
+  for (const u of S.units){
+    if (u.status === "retired") continue;
+    if (!t.has(u.item_id)) t.set(u.item_id, {});
+    const o = t.get(u.item_id), l = u.location_id || shopLocId() || "shop"; o[l] = (o[l]||0) + 1;
   }
   return t;
 }
@@ -521,11 +554,17 @@ function renderForm(){
   if (!S.sel.loc || !find(S.locs, S.sel.loc)) { if (S.loaded.has("locations")) S.sel.loc = shopLocId(); }
   $("#loc-v").textContent = S.sel.loc ? locName(S.sel.loc) : "Shop";
   const btn = $("#enter"), s = $("#enter-s");
+  // serialized categories (Engines, Chassis) take a serial number instead of a quantity
+  const ser = isSerialCat(S.sel.cat);
+  $("#serialrow").hidden = !ser; $("#qtyrow").hidden = ser;
+  if (ser && S.qtyActive) { S.qtyActive = false; keypadUI(); }
   let why = "";
   if (!S.db) why = "Saving unavailable here";
   else if (!S.sel.cat) why = "Pick a category";
   else if (!S.sel.part) why = "Pick a part";
-  else if (qtyVal() <= 0) why = "Enter a quantity";
+  else if (ser && !serialVal()) why = "Type the serial number";
+  else if (ser && serialTaken()) why = "That serial is already in";
+  else if (!ser && qtyVal() <= 0) why = "Enter a quantity";
   else if (S.photo && S.photo.uploading) why = "Uploading photo…";
   btn.disabled = !!why;
   const cam = $("#cam-go");
@@ -572,6 +611,16 @@ function enter(){
     if (!item.bin && bin) patch.bin = bin;
     if (!item.photo && photo) patch.photo = photo;
     if (Object.keys(patch).length && !S.pendingItems.has(key)) { const id = item.id; write(() => db.doc("items/" + id).update(patch), "the item"); }
+  }
+  if (isSerialCat(S.sel.cat)) {
+    const uref = db.collection("units").doc(), serial = serialVal();
+    const unit = { item_id:item.id, code:newUnitCode(item), serial, status:"ready", location_id:S.sel.loc, builder:"", notes:$("#note").value.trim(), photo, created_by:S.uid, created_at:new Date(now).toISOString() };
+    write(() => uref.set(unit), "the new unit");
+    toast(`Added ${itemTitle(item)} #${serial}`, "Undo", () => undoUnit(uref.id));
+    // stay on the same part so the next serial can go straight in
+    $("#serial").value = ""; $("#note").value = ""; $("#note").hidden = true; $("#b-note").classList.remove("on");
+    clearPhoto(); renderAll(); focusQty();
+    return;
   }
   const mref = db.collection("moves").doc();
   const move = { item_id:item.id, qty:qtyVal(), type:"count", location_id:S.sel.loc, bin, note:$("#note").value.trim(), photo, by:S.uid, at:new Date(now).toISOString(), ts:now };
@@ -671,13 +720,14 @@ function renderPicker(){
   let h = "";
   if (P.editing){
     if (!all.length) h = `<div class="hint">Nothing to edit yet.</div>`;
-    h += list.map(o => `<div class="edrow"><input id="ed-${esc(o.id)}" value="${esc(o.label)}" data-ren="${esc(o.id)}" aria-label="Rename ${esc(o.label)}" autocomplete="off" enterkeyhint="done"><button class="btn danger need-admin" type="button" data-del="${esc(o.id)}">Delete</button><div class="why" id="why-${esc(o.id)}" hidden></div></div>`).join("");
+    h += list.map(o => `<div class="edrow"><input id="ed-${esc(o.id)}" value="${esc(o.label)}" data-ren="${esc(o.id)}" aria-label="Rename ${esc(o.label)}" autocomplete="off" enterkeyhint="done">${P.extra ? P.extra(o) : "<span></span>"}<button class="btn danger need-admin" type="button" data-del="${esc(o.id)}">Delete</button><div class="why" id="why-${esc(o.id)}" hidden></div></div>`).join("");
     h += `<div class="hint">Change the text to rename (saves when you leave the box).${S.role === "admin" ? " Delete asks you to confirm and tells you what else goes with it." : " Only a master admin can delete."}</div>`;
     body.innerHTML = h;
     body.querySelectorAll("[data-ren]").forEach(inp => {
       inp.onchange = () => { const v = inp.value.trim(); if (v && v !== (P.get().find(o => o.id === inp.dataset.ren) || {}).label) { P.onRename(inp.dataset.ren, v); toast("Renamed to " + v); } };
       inp.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); inp.blur(); } };
     });
+    body.querySelectorAll("[data-extra]").forEach(b => b.onclick = () => { if (P.onExtra) P.onExtra(b.dataset.extra); });
     body.querySelectorAll("[data-del]").forEach(b => b.onclick = () => {
       const id = b.dataset.del, why = document.getElementById("why-" + id);
       const blocked = P.blocked ? P.blocked(id) : "";
@@ -766,6 +816,13 @@ function openCatPicker(){
     onRename:(id, n) => renameDoc("categories", id, n),
     onDelete:id => { const n = catName(id); runPlan(deletePlan({ cats:[id] })); toast(`Deleted ${n}`); },
     impact:id => describePlan(deletePlan({ cats:[id] })),
+    extra:o => S.role === "admin" ? `<button class="btn" type="button" data-extra="${esc(o.id)}" aria-pressed="${isSerialCat(o.id)}" style="${isSerialCat(o.id) ? "background:var(--ink);color:var(--surface)" : ""}">Serial #s ${isSerialCat(o.id) ? "on" : "off"}</button>` : "<span></span>",
+    onExtra:id => {
+      const on = !isSerialCat(id), c = find(S.cats, id); if (c) c.serialized = on;
+      write(() => S.db.doc("categories/" + id).update({ serialized:on }), "the setting");
+      toast(on ? `${catName(id)}: each one now gets a serial number` : `${catName(id)}: counted by quantity again`);
+      renderPicker(); renderForm();
+    },
     emptyHint:"No categories yet. Type one above, like Suspension, and tap Add."
   });
 }
@@ -832,6 +889,7 @@ function openLocPicker(){
   });
 }
 function focusQty(){
+  if (isSerialCat(S.sel.cat)) { S.qtyActive = false; keypadUI(); renderForm(); setTimeout(() => { const i = $("#serial"); i.focus(); i.select(); }, 60); return; }
   const a = document.activeElement; if (a && a !== document.body && a.blur) a.blur();
   S.qtyActive = true; keypadUI();
 }
@@ -864,6 +922,7 @@ function renderStock(){
   const order = [...groups.keys()].sort((a,b) => { const A = find(S.cats,a), B = find(S.cats,b); return (A?.sort ?? 999) - (B?.sort ?? 999) || catName(a).localeCompare(catName(b)); });
   el.innerHTML = order.map(k => {
     const g = groups.get(k).sort((a,b) => itemTitle(a.it).localeCompare(itemTitle(b.it), undefined, {numeric:true}));
+    if (S.qe && isSerialCat(k)) return "";
     if (S.qe) return `<div class="grp"><span>${esc(catName(k))}</span><span>${g.reduce((a,r)=>a+r.qty,0)}</span></div><div class="list">` + g.map(r => {
       const d = S.qeDraft[r.it.id] || {}, minV = d.min !== undefined ? d.min : (r.it.min_qty ?? "");
       return `<div class="qerow" data-qe="${esc(r.it.id)}"><div class="nm"><b>${esc(itemTitle(r.it))}</b><span>${esc(r.it.code)} · ${r.qty} on hand</span></div><div class="ins">
@@ -872,7 +931,7 @@ function renderStock(){
         <label>Damaged<input data-f="damaged" inputmode="numeric" pattern="[0-9]*" value="${esc(d.damaged || "")}" placeholder="0" class="${d.damaged ? "chg" : ""}" aria-label="Damaged for ${esc(itemTitle(r.it))}"></label></div></div>`;
     }).join("") + `</div>`;
     return `<div class="grp"><span>${esc(catName(k))}</span><span>${g.reduce((a,r)=>a+r.qty,0)}</span></div><div class="list">` + g.map(r =>
-      `<button class="row ${r.qty ? "" : "zero"}" type="button" data-item="${esc(r.it.id)}"><div><div class="t">${esc(itemTitle(r.it))}</div><div class="m"><span class="code">${esc(r.it.code)}</span>${r.it.bin ? `<span>${esc(r.it.bin)}</span>` : ""}${r.it.photo ? "<span>photo</span>" : ""}${isLow(r.it, t.get(r.it.id)) ? '<span class="lowtag">Low</span>' : ""}</div></div><div class="q">${r.qty}</div></button>`).join("") + `</div>`;
+      `<button class="row ${r.qty ? "" : "zero"}" type="button" data-item="${esc(r.it.id)}"><div><div class="t">${esc(itemTitle(r.it))}</div><div class="m"><span class="code">${esc(r.it.code)}</span>${r.it.bin ? `<span>${esc(r.it.bin)}</span>` : ""}${r.it.photo ? "<span>photo</span>" : ""}${isLow(r.it, t.get(r.it.id)) ? '<span class="lowtag">Low</span>' : ""}${(() => { const n = unitsOf(r.it.id).filter(u => unitStats(u).due).length; return n ? `<span class="duetag">${n} due</span>` : ""; })()}</div></div><div class="q">${r.qty}</div></button>`).join("") + `</div>`;
   }).join("");
   if (S.qe) el.insertAdjacentHTML("afterbegin", `<div class="qehead"><b>Quick edit</b><div class="r"><span>Used and Damaged come out of</span><select id="qe-loc" aria-label="Take Used and Damaged from">${locs.map(l => `<option value="${esc(l.id)}" ${l.id === S.qeLoc ? "selected" : ""}>${esc(l.name)}</option>`).join("")}</select></div><span class="hint" style="padding:0">Search first to narrow the list. Changed boxes turn red. Nothing saves until you tap Save.</span></div>`);
 }
@@ -927,6 +986,14 @@ function openItem(id){
   };
   $("#it-use").onclick = () => openUse(it, t);
   $("#it-fix").onclick = () => openFix(it);
+  if (isSerialCat(it.category_id)) {
+    // serialized part: units instead of a counted history
+    ["#it-move", "#it-use", "#it-fix"].forEach(q => { const b = $(q); if (b) b.hidden = true; });
+    $("#it-count").textContent = "Add unit";
+    const hs = sc.querySelector(".det h2:last-of-type"); if (hs) hs.textContent = `Units (${unitsOf(id).length})`;
+    const hist = sc.querySelector(".hist"); if (hist) hist.innerHTML = unitListHtml(id);
+    sc.querySelectorAll("[data-unit]").forEach(b => b.onclick = () => openUnit(b.dataset.unit));
+  }
   $("#it-count").onclick = () => { S.sel.cat = it.category_id; S.sel.part = it.part_id; S.sel.size = it.size_id || null; store.set("cat", it.category_id); closePicker(); setTab("count"); renderForm(); focusQty(); };
   $("#it-label").onclick = () => saveLabel(it);
   $("#it-move").onclick = () => openMove(it, t);
@@ -945,27 +1012,29 @@ function openItem(id){
   });
 }
 
-function labelCanvas(it){
+function labelCanvas(it, o){
+  o = o || {};
+  const code = o.code || it.code;
   const holder = document.createElement("div");
-  new QRCode(holder, { text: qrText(it.code), width: 360, height: 360, correctLevel: QRCode.CorrectLevel.M });
+  new QRCode(holder, { text: qrText(code), width: 360, height: 360, correctLevel: QRCode.CorrectLevel.M });
   const qc = holder.querySelector("canvas");
   const c = document.createElement("canvas"); c.width = 1050; c.height = 450;
   const x = c.getContext("2d");
   x.fillStyle = "#fff"; x.fillRect(0,0,c.width,c.height);
   if (qc) x.drawImage(qc, 45, 45, 360, 360);
   x.fillStyle = "#000"; x.textBaseline = "top";
-  x.font = "700 78px 'IBM Plex Mono', monospace"; x.fillText(it.code, 445, 60);
+  x.font = (code.length > 9 ? "700 62px" : "700 78px") + " 'IBM Plex Mono', monospace"; x.fillText(code, 445, 60);
   x.font = "600 46px 'IBM Plex Sans', sans-serif"; wrapText(x, partName(it.part_id), 445, 170, 570, 54, 2);
   x.font = "500 40px 'IBM Plex Sans', sans-serif";
-  if (it.size_id) x.fillText(sizeName(it.size_id), 445, 290);
+  const l2 = o.line2 || (it.size_id ? sizeName(it.size_id) : ""); if (l2) x.fillText(l2, 445, 290);
   x.fillStyle = "#555"; x.font = "500 30px 'IBM Plex Sans', sans-serif"; x.fillText(catName(it.category_id).toUpperCase() + (it.bin ? "  ·  " + it.bin : ""), 445, 360);
   return c;
 }
-async function saveLabel(it){
+async function saveLabel(it, o){
   if (!S.downloads || !window.QRCode){ toast("The QR code tool didn't load. Check signal and reload.", null, null, true); return; }
-  const c = labelCanvas(it);
+  const c = labelCanvas(it, o);
   const blob = await new Promise(r => c.toBlob(r, "image/png"));
-  try { await S.downloads.save({ filename:`label-${it.code}.png`, data:blob }); toast("Label saved"); }
+  try { await S.downloads.save({ filename:`label-${(o && o.code) || it.code}.png`, data:blob }); toast("Label saved"); }
   catch (e) { if (e && e.code !== "declined") toast("Couldn't save the label.", null, null, true); }
 }
 function wrapText(x, text, X, Y, w, lh, maxLines){
@@ -996,14 +1065,173 @@ async function exportCsv(kind){
     const t = totals();
     const last = new Map();
     for (const m of S.moves) { const p = last.get(m.item_id); if (!p || (m.ts || 0) > (p.ts || 0)) last.set(m.item_id, m); }
-    rows = [["Code","Category","Part","Size","Bin"].concat(locs.map(l => l.name), ["Total","Keep at least","Low","Last entry","Last entry by"])];
-    for (const it of S.items){ const o = t.get(it.id) || {}; const per = locs.map(l => o[l.id] || 0); const lm = last.get(it.id); rows.push([it.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), it.bin || ""].concat(per, [per.reduce((a,b)=>a+b,0), it.min_qty ?? "", isLow(it, o) ? "LOW" : "", lm ? stamp(lm) : "", lm ? initialsOf(lm.by) : ""])); }
+    rows = [["Code","Category","Part","Size","Bin"].concat(locs.map(l => l.name), ["Total","Keep at least","Low","Part number","Supplier","Value each","Total value","Last entry","Last entry by"])];
+    let grand = 0;
+    for (const it of S.items){ const o = t.get(it.id) || {}; const per = locs.map(l => o[l.id] || 0); const lm = last.get(it.id); rows.push([it.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), it.bin || ""].concat(per, (() => { const tot = per.reduce((a,b)=>a+b,0), ve = it.unit_value == null ? null : Number(it.unit_value), tv = ve == null ? "" : (ve * tot).toFixed(2); if (tv !== "") grand += Number(tv); return [tot, it.min_qty ?? "", isLow(it, o) ? "LOW" : "", it.part_number || "", it.supplier || "", ve == null ? "" : ve.toFixed(2), tv, lm ? stamp(lm) : "", lm ? initialsOf(lm.by) : ""]; })())); }
+    if (grand > 0) { const blank = rows[0].map(() => ""); blank[0] = "TOTAL VALUE"; blank[rows[0].indexOf("Total value")] = grand.toFixed(2); rows.push(blank); }
   } else {
     rows = [["Date","Code","Category","Part","Size","Location","Bin","Qty","Type","Note","By","By name"]];
     for (const m of S.moves.slice().sort((a,b) => (a.ts||0)-(b.ts||0))){ const it = find(S.items, m.item_id) || {}; rows.push([stamp(m), it.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), locName(m.location_id), m.bin, m.qty, typeName(m.type), m.note, initialsOf(m.by), nameOf(m.by)]); }
   }
   const csv = "﻿" + rows.map(r => r.map(csvCell).join(",")).join("\r\n");
   try { await S.downloads.save({ filename:`race-inventory-${kind}-${d}.csv`, data:csv }); closePicker(); toast("Exported"); }
+  catch (e) { if (e && e.code !== "declined") toast("Export didn't save. Try again.", null, null, true); }
+}
+
+/* ---------- serialized units (Engines, Chassis) ---------- */
+const isSerialCat = id => !!(find(S.cats, id) || {}).serialized;
+const unitsOf = itemId => S.units.filter(u => u.item_id === itemId).sort((a,b) => String(a.serial).localeCompare(String(b.serial), undefined, { numeric:true }));
+const UNIT_STATUS = { ready:"Ready", needs_work:"Needs work", wrecked:"Wrecked", retired:"Retired" };
+const LOG_TYPES = { race:"Race", test:"Test", rebuild:"Rebuild", repair:"Repair", crash:"Crash", dyno:"Dyno", note:"Note" };
+const serialVal = () => ($("#serial").value || "").trim();
+function serialTaken(){
+  const v = norm(serialVal()); if (!v) return false;
+  const items = new Set(S.items.filter(i => i.part_id === S.sel.part).map(i => i.id));
+  return S.units.some(u => items.has(u.item_id) && norm(u.serial) === v);
+}
+function newUnitCode(item){
+  const pre = item.code + "-", used = new Set(S.units.map(u => u.code));
+  let n = 1 + S.units.filter(u => u.item_id === item.id).reduce((m, u) => Math.max(m, parseInt(String(u.code).slice(pre.length), 10) || 0), 0);
+  while (used.has(pre + String(n).padStart(2, "0"))) n++;
+  return pre + String(n).padStart(2, "0");
+}
+const num1 = v => { const n = Math.round((Number(v) || 0) * 10) / 10; return Number.isInteger(n) ? String(n) : n.toFixed(1); };
+function unitStats(u){
+  const log = S.ulog.filter(l => l.unit_id === u.id).sort((a,b) => (a.ts||0) - (b.ts||0));
+  let rb = null; for (const l of log) if (l.type === "rebuild") rb = l;
+  const since = log.filter(l => l.type !== "rebuild" && (!rb || (l.ts||0) > (rb.ts||0)));
+  const sum = (arr, k) => arr.reduce((a, l) => a + (Number(l[k]) || 0), 0);
+  const st = { hSince:sum(since, "hours"), lSince:sum(since, "laps"), hAll:sum(log, "hours"), lAll:sum(log, "laps"), lastRebuild:rb, entries:log.length };
+  st.due = !!((u.rebuild_hours && st.hSince >= Number(u.rebuild_hours)) || (u.rebuild_laps && st.lSince >= Number(u.rebuild_laps)));
+  return st;
+}
+const sinceText = st => [st.hSince ? num1(st.hSince) + " h" : "", st.lSince ? st.lSince + " laps" : ""].filter(Boolean).join(" · ") || "no time logged";
+function undoUnit(id){
+  write(() => S.db.doc("units/" + id).delete(), "the undo");
+  S.units = S.units.filter(u => u.id !== id); renderAll();
+}
+function unitListHtml(itemId){
+  const us = unitsOf(itemId);
+  if (!us.length) return `<div class="empty">No units yet. Use <b>Add unit</b> and type each serial number.</div>`;
+  return us.map(u => { const st = unitStats(u); return `<button class="row" type="button" data-unit="${esc(u.id)}"><div><div class="t">#${esc(u.serial)}</div><div class="m"><span class="ustat ${esc(u.status)}">${esc(UNIT_STATUS[u.status] || u.status)}</span><span>${esc(locName(u.location_id))}</span><span>${esc(sinceText(st))} since rebuild</span>${st.due ? '<span class="duetag">Due</span>' : ""}</div></div><span class="code">${esc(u.code)}</span></button>`; }).join("");
+}
+function openUnit(id, panel){
+  const u = find(S.units, id); if (!u) return;
+  const it = find(S.items, u.item_id) || {}, st = unitStats(u);
+  const log = S.ulog.filter(l => l.unit_id === id).sort((a,b) => (b.ts||0) - (a.ts||0));
+  const locs = S.locs.slice().sort((a,b) => (a.sort ?? 999) - (b.sort ?? 999) || byName(a,b));
+  const today = new Date(), z = n => String(n).padStart(2, "0"), ymd = `${today.getFullYear()}-${z(today.getMonth()+1)}-${z(today.getDate())}`;
+  const sc = $("#scrim"); sc.hidden = false;
+  sc.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="un-t">
+    <div class="sh-hd"><h3 id="un-t">#${esc(u.serial)}<small>${esc(itemTitle(it))} · ${esc(u.code)}</small></h3><button class="iconbtn" id="un-back" type="button">Back</button><button class="iconbtn" id="un-x" type="button">Close</button></div>
+    <div class="det">
+      <div class="top"><dl class="kv"><dt>Status</dt><dd><span class="ustat ${esc(u.status)}">${esc(UNIT_STATUS[u.status])}</span> ${st.due ? '<span class="duetag">Due</span>' : ""}</dd><dt>Location</dt><dd>${esc(locName(u.location_id))}</dd>${u.builder ? `<dt>Builder</dt><dd>${esc(u.builder)}</dd>` : ""}<dt>Last rebuild</dt><dd>${st.lastRebuild ? esc(new Date(st.lastRebuild.ts || st.lastRebuild.at).toLocaleDateString([], { month:"short", day:"numeric", year:"numeric" })) : "—"}</dd></dl><div class="qr" id="un-qr" aria-label="QR code for ${esc(u.code)}"></div></div>
+      <div class="ugrid">
+        <div class="ubox"><span>Since rebuild</span><b>${st.hSince ? num1(st.hSince) + " h" : "—"}</b><small>${st.lSince ? st.lSince + " laps" : "no laps"}</small></div>
+        <div class="ubox"><span>Lifetime</span><b>${st.hAll ? num1(st.hAll) + " h" : "—"}</b><small>${st.lAll ? st.lAll + " laps" : "no laps"}</small></div>
+      </div>
+      ${(u.rebuild_hours || u.rebuild_laps) ? `<p class="hint" style="padding:8px 0 0">Rebuild every ${[u.rebuild_hours ? num1(u.rebuild_hours) + " h" : "", u.rebuild_laps ? u.rebuild_laps + " laps" : ""].filter(Boolean).join(" or ")}.</p>` : ""}
+      ${u.notes ? `<p class="hint" style="padding:6px 0 0">${esc(u.notes)}</p>` : ""}
+      ${u.photo ? `<img class="photo" data-photo="${esc(u.photo)}" alt="Photo of #${esc(u.serial)}">` : ""}
+      <div class="actions"><button class="btn primary need-edit" id="un-addlog" type="button">Add log entry</button><button class="btn need-edit" id="un-edit" type="button">Edit details</button><button class="btn" id="un-label" type="button">Save QR label</button><button class="btn danger need-admin" id="un-del" type="button">Delete unit</button></div>
+      <div class="why" id="un-delwhy" hidden style="margin-top:8px;font-size:13px;color:var(--bad);font-weight:600"></div>
+      <div class="movebox" id="un-logbox" hidden>
+        <div class="ltypes" role="group" aria-label="Entry type">${Object.entries(LOG_TYPES).map(([k, v], i) => `<button type="button" data-lt="${k}" aria-pressed="${i === 0}">${v}</button>`).join("")}</div>
+        <div class="lgrid"><label class="ufld"><span>Date</span><input id="lg-date" type="date" value="${ymd}"></label><label class="ufld"><span>Hours</span><input id="lg-hours" inputmode="decimal" placeholder="optional" autocomplete="off"></label><label class="ufld"><span>Laps</span><input id="lg-laps" inputmode="numeric" pattern="[0-9]*" placeholder="optional" autocomplete="off"></label></div>
+        <label class="ufld"><span>Note</span><input id="lg-note" placeholder="e.g. Talladega, ran 3rd" autocomplete="off"></label>
+        <label class="ufld"><span>Photos or PDFs (dyno sheet, receipts)</span><input id="lg-files" type="file" multiple accept="image/*,application/pdf" style="padding-top:9px"></label>
+        <button class="go" id="lg-go" type="button">Save entry</button><div class="err" id="lg-err"></div>
+      </div>
+      <div class="movebox" id="un-editbox" hidden>
+        <div class="lgrid" style="grid-template-columns:1fr 1fr"><label class="ufld"><span>Serial #</span><input id="ue-serial" value="${esc(u.serial)}" autocapitalize="characters" autocomplete="off"></label><label class="ufld"><span>Builder</span><input id="ue-builder" value="${esc(u.builder || "")}" autocomplete="off"></label></div>
+        <div class="lgrid" style="grid-template-columns:1fr 1fr"><label class="ufld"><span>Status</span><select id="ue-status">${Object.entries(UNIT_STATUS).map(([k, v]) => `<option value="${k}" ${u.status === k ? "selected" : ""}>${v}</option>`).join("")}</select></label><label class="ufld"><span>Location</span><select id="ue-loc">${locs.map(l => `<option value="${esc(l.id)}" ${l.id === u.location_id ? "selected" : ""}>${esc(l.name)}</option>`).join("")}</select></label></div>
+        <div class="lgrid" style="grid-template-columns:1fr 1fr"><label class="ufld"><span>Rebuild every (hours)</span><input id="ue-rh" inputmode="decimal" value="${u.rebuild_hours ?? ""}" placeholder="optional"></label><label class="ufld"><span>Rebuild every (laps)</span><input id="ue-rl" inputmode="numeric" pattern="[0-9]*" value="${u.rebuild_laps ?? ""}" placeholder="optional"></label></div>
+        <label class="ufld"><span>Notes</span><textarea id="ue-notes">${esc(u.notes || "")}</textarea></label>
+        <button class="go" id="ue-go" type="button">Save details</button><div class="err" id="ue-err"></div>
+      </div>
+      <h2>Log</h2>
+      <div class="hist">${log.map(l => `<div class="row"><div><div class="t">${esc(LOG_TYPES[l.type] || l.type)}${l.hours != null && l.hours !== "" ? " · " + num1(l.hours) + " h" : ""}${l.laps != null && l.laps !== "" ? " · " + esc(l.laps) + " laps" : ""}</div><div class="m"><span>${esc(new Date(l.ts || l.at).toLocaleDateString([], { month:"short", day:"numeric", year:"numeric" }))}</span>${l.note ? `<span>${esc(l.note)}</span>` : ""}</div>${(l.files || []).length ? `<div class="files">${l.files.map(f => `<a data-file="${esc(f.path)}" target="_blank" rel="noopener">${esc(f.name || "file")}</a>`).join("")}</div>` : ""}</div><span class="confirm need-edit"><button class="undo" type="button" data-ldel="${esc(l.id)}">Delete</button></span></div>`).join("") || `<div class="empty">No log entries yet.</div>`}</div>
+    </div></div>`;
+  $("#un-x").onclick = closePicker;
+  $("#un-back").onclick = () => openItem(u.item_id);
+  try { if (window.QRCode) new QRCode($("#un-qr"), { text: qrText(u.code), width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M }); else $("#un-qr").hidden = true; } catch { $("#un-qr").hidden = true; }
+  const ph = sc.querySelector("img.photo[data-photo]");
+  if (ph && typeof photoSrc === "function") photoSrc(ph.dataset.photo).then(src => { ph.src = src; }).catch(() => { ph.hidden = true; });
+  sc.querySelectorAll("[data-file]").forEach(a => { if (typeof photoSrc === "function") photoSrc(a.dataset.file).then(src => { a.href = src; }).catch(() => { a.textContent += " (unavailable)"; }); });
+  const show = which => { $("#un-logbox").hidden = which !== "log"; $("#un-editbox").hidden = which !== "edit"; const b = $(which === "log" ? "#un-logbox" : "#un-editbox"); if (which) setTimeout(() => b.scrollIntoView({ block:"nearest", behavior:"smooth" }), 30); };
+  $("#un-addlog").onclick = () => show($("#un-logbox").hidden ? "log" : null);
+  $("#un-edit").onclick = () => show($("#un-editbox").hidden ? "edit" : null);
+  if (panel) show(panel);
+  let ltype = "race";
+  sc.querySelectorAll("[data-lt]").forEach(b => b.onclick = () => { ltype = b.dataset.lt; sc.querySelectorAll("[data-lt]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); });
+  $("#lg-go").onclick = async () => {
+    const err = $("#lg-err"); err.textContent = "";
+    const hr = $("#lg-hours").value.trim().replace(",", "."), lp = $("#lg-laps").value.trim();
+    if (hr && !/^\d+(\.\d)?$/.test(hr)) { err.textContent = "Hours: a number like 2 or 2.5."; return; }
+    if (lp && !/^\d+$/.test(lp)) { err.textContent = "Laps: a whole number."; return; }
+    const d = $("#lg-date").value ? new Date($("#lg-date").value + "T12:00:00") : new Date();
+    const now = new Date(); d.setHours(now.getHours(), now.getMinutes(), now.getSeconds());
+    const go = $("#lg-go"); go.disabled = true; go.textContent = "Saving…";
+    const files = [];
+    try {
+      for (const f of Array.from($("#lg-files").files || [])) {
+        const isPdf = f.type === "application/pdf" || /\.pdf$/i.test(f.name);
+        const blob = isPdf ? f : await compress(f);
+        const r = await S.assets.upload(blob, { type: isPdf ? "application/pdf" : "image/jpeg", name: f.name });
+        files.push({ path:r.id, name:f.name || (isPdf ? "file.pdf" : "photo.jpg"), type: isPdf ? "pdf" : "image" });
+      }
+    } catch { err.textContent = "A file didn't upload. Check signal, or try a smaller file."; go.disabled = false; go.textContent = "Save entry"; return; }
+    const ref = S.db.collection("unit_log").doc();
+    write(() => ref.set({ unit_id:id, type:ltype, hours: hr === "" ? null : Number(hr), laps: lp === "" ? null : parseInt(lp, 10), note:$("#lg-note").value.trim(), files, at:d.toISOString(), ts:d.getTime(), by:S.uid }), "the log entry");
+    toast(`${LOG_TYPES[ltype]} logged for #${u.serial}`);
+    openUnit(id);
+  };
+  $("#ue-go").onclick = () => {
+    const err = $("#ue-err"); err.textContent = "";
+    const serial = $("#ue-serial").value.trim(), rh = $("#ue-rh").value.trim().replace(",", "."), rl = $("#ue-rl").value.trim();
+    if (!serial) { err.textContent = "Serial can't be blank."; return; }
+    if (S.units.some(x => x.id !== id && x.item_id === u.item_id && norm(x.serial) === norm(serial))) { err.textContent = "Another unit already has that serial."; return; }
+    if (rh && !/^\d+(\.\d)?$/.test(rh)) { err.textContent = "Rebuild hours: a number like 25 or 25.5."; return; }
+    if (rl && !/^\d+$/.test(rl)) { err.textContent = "Rebuild laps: a whole number."; return; }
+    write(() => S.db.doc("units/" + id).update({ serial, builder:$("#ue-builder").value.trim(), status:$("#ue-status").value, location_id:$("#ue-loc").value, rebuild_hours: rh === "" ? null : Number(rh), rebuild_laps: rl === "" ? null : parseInt(rl, 10), notes:$("#ue-notes").value.trim() }), "the unit");
+    toast("Saved"); openUnit(id);
+  };
+  $("#un-label").onclick = () => saveLabel(it, { code:u.code, line2:"SN " + u.serial });
+  $("#un-del").onclick = () => {
+    const b = $("#un-del"), why = $("#un-delwhy");
+    if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "Confirm delete"; b.classList.add("armed"); why.textContent = `Removes #${u.serial} and its ${plural(log.length, "log entry").replace("entrys","entries")}. To keep its history, set its status to Retired instead.`; why.hidden = false; return; }
+    write(() => S.db.doc("units/" + id).delete(), "the delete");
+    S.units = S.units.filter(x => x.id !== id); closePicker(); toast(`Deleted #${u.serial}`); openItem(u.item_id);
+  };
+  sc.querySelectorAll("[data-ldel]").forEach(b => b.onclick = () => {
+    if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "Confirm delete"; b.style.color = "var(--bad)"; return; }
+    const lid = b.dataset.ldel; write(() => S.db.doc("unit_log/" + lid).delete(), "the delete");
+    S.ulog = S.ulog.filter(l => l.id !== lid); openUnit(id);
+  });
+}
+// open whatever a scanned code points at: an item or a single engine/chassis
+function openByCode(raw){
+  const code = String(raw || "").trim().toUpperCase();
+  const it = S.items.find(i => i.code === code);
+  if (it) { closePicker(); setTab("stock"); openItem(it.id); return true; }
+  const u = S.units.find(x => String(x.code).toUpperCase() === code);
+  if (u) { closePicker(); setTab("stock"); openUnit(u.id); return true; }
+  return false;
+}
+function unitsCsv(kind){
+  const rows = [];
+  const units = S.units.slice().sort((a,b) => (catName((find(S.items, a.item_id) || {}).category_id) + a.serial).localeCompare(catName((find(S.items, b.item_id) || {}).category_id) + b.serial, undefined, { numeric:true }));
+  if (kind === "units") {
+    rows.push(["Code","Category","Part","Size","Serial","Status","Location","Builder","Hours since rebuild","Laps since rebuild","Lifetime hours","Lifetime laps","Last rebuild","Rebuild every (hours)","Rebuild every (laps)","Due","Notes"]);
+    for (const u of units) { const it = find(S.items, u.item_id) || {}, st = unitStats(u); rows.push([u.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), u.serial, UNIT_STATUS[u.status], locName(u.location_id), u.builder || "", num1(st.hSince), st.lSince, num1(st.hAll), st.lAll, st.lastRebuild ? stamp(st.lastRebuild) : "", u.rebuild_hours ?? "", u.rebuild_laps ?? "", st.due ? "DUE" : "", u.notes || ""]); }
+  } else {
+    rows.push(["Date","Code","Category","Part","Serial","Entry","Hours","Laps","Note","Files","By","By name"]);
+    for (const l of S.ulog.slice().sort((a,b) => (a.ts||0) - (b.ts||0))) { const u = find(S.units, l.unit_id) || {}, it = find(S.items, u.item_id) || {}; rows.push([stamp(l), u.code, catName(it.category_id), partName(it.part_id), u.serial, LOG_TYPES[l.type] || l.type, l.hours ?? "", l.laps ?? "", l.note || "", (l.files || []).map(f => f.name).join("; "), initialsOf(l.by), nameOf(l.by)]); }
+  }
+  return "\ufeff" + rows.map(r => r.map(csvCell).join(",")).join("\r\n");
+}
+async function exportUnits(kind){
+  try { await S.downloads.save({ filename:`race-inventory-${kind === "units" ? "engines-chassis" : "engines-chassis-log"}-${new Date().toISOString().slice(0,10)}.csv`, data:unitsCsv(kind) }); closePicker(); toast("Exported"); }
   catch (e) { if (e && e.code !== "declined") toast("Export didn't save. Try again.", null, null, true); }
 }
 
@@ -1132,9 +1360,9 @@ function openDups(){
 function bulkSheetCsv(){
   const t = totals();
   const locs = S.locs.slice().sort((a,b) => (a.sort ?? 999) - (b.sort ?? 999) || byName(a,b));
-  const rows = [["Code","Category","Part","Size","Bin"].concat(locs.map(l => l.name), ["Total","Keep at least","Used","Damaged","Take from","Note"])];
+  const rows = [["Code","Category","Part","Size","Bin"].concat(locs.map(l => l.name), ["Total","Keep at least","Part number","Supplier","Value each","Used","Damaged","Take from","Note"])];
   const items = S.items.slice().sort((a,b) => (catName(a.category_id) + itemTitle(a)).localeCompare(catName(b.category_id) + itemTitle(b), undefined, { numeric:true }));
-  for (const it of items) { const o = t.get(it.id) || {}; const per = locs.map(l => o[l.id] || 0); rows.push([it.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), it.bin || ""].concat(per, [per.reduce((a,b)=>a+b,0), it.min_qty ?? "", "", "", "", ""])); }
+  for (const it of items) { const o = t.get(it.id) || {}; const per = locs.map(l => o[l.id] || 0); rows.push([it.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), it.bin || ""].concat(per, [per.reduce((a,b)=>a+b,0), it.min_qty ?? "", it.part_number || "", it.supplier || "", it.unit_value ?? "", "", "", "", ""])); }
   return "\ufeff" + rows.map(r => r.map(csvCell).join(",")).join("\r\n");
 }
 async function downloadBulkSheet(){
@@ -1165,13 +1393,14 @@ async function readSheetFile(file){
   return parseCsv(await file.text());
 }
 function planImport(rows){
-  const out = { changes:[], errors:[], minN:0, binN:0, usedN:0, dmgN:0, unknown:[] };
+  const out = { changes:[], errors:[], minN:0, binN:0, usedN:0, dmgN:0, infoN:0, unknown:[] };
   if (!rows.length) { out.errors.push("The file is empty."); return out; }
   const head = rows[0].map(h => String(h).trim().toLowerCase());
   const col = name => head.indexOf(name);
   const ci = col("code");
   if (ci < 0) { out.errors.push("Couldn't find a Code column. Start from the bulk edit sheet the app makes."); return out; }
   const cBin = col("bin"), cMin = col("keep at least"), cUsed = col("used"), cDmg = col("damaged"), cFrom = col("take from"), cNote = col("note");
+  const cPn = col("part number"), cSup = col("supplier"), cVal = col("value each");
   const t = totals(), byCode = new Map(S.items.map(i => [String(i.code).toUpperCase(), i]));
   const locByName = new Map(S.locs.map(l => [norm(l.name), l.id]));
   const num = v => { v = String(v ?? "").trim(); if (v === "") return 0; return /^\d+$/.test(v) ? parseInt(v, 10) : NaN; };
@@ -1185,8 +1414,18 @@ function planImport(rows){
       if (v !== "" && !/^\d+$/.test(v)) out.errors.push(`Row ${line} (${code}): Keep at least "${v}" isn't a whole number.`);
       else { const nv = v === "" ? null : parseInt(v, 10); if (nv !== (it.min_qty ?? null)) { ch.min_qty = nv === null ? "" : String(nv); out.minN++; any = true; } }
     }
+    let info = false;
+    if (cPn >= 0) { const v = String(row[cPn] ?? "").trim(); if (v !== (it.part_number || "")) { ch.part_number = v; info = true; } }
+    if (cSup >= 0) { const v = String(row[cSup] ?? "").trim(); if (v !== (it.supplier || "")) { ch.supplier = v; info = true; } }
+    if (cVal >= 0) {
+      const raw = String(row[cVal] ?? "").trim(), v = raw.replace(/[$,\s]/g, "");
+      if (v !== "" && !/^\d+(\.\d{1,2})?$/.test(v)) out.errors.push(`Row ${line} (${code}): Value each "${raw}" isn't a dollar amount.`);
+      else { const nv = v === "" ? null : Number(v), cur = it.unit_value == null ? null : Number(it.unit_value); if (nv !== cur) { ch.unit_value = v; info = true; } }
+    }
+    if (info) { out.infoN++; any = true; }
     const used = cUsed >= 0 ? num(row[cUsed]) : 0, dmg = cDmg >= 0 ? num(row[cDmg]) : 0;
     if (isNaN(used) || isNaN(dmg)) out.errors.push(`Row ${line} (${code}): Used/Damaged must be whole numbers.`);
+    else if ((used || dmg) && isSerialCat(it.category_id)) out.errors.push(`Row ${line} (${code}): engines and chassis are tracked per unit. Set the unit's status instead of Used/Damaged.`);
     else if (used || dmg) {
       const fromName = cFrom >= 0 ? String(row[cFrom] ?? "").trim() : "";
       const loc = fromName ? locByName.get(norm(fromName)) : shopLocId();
@@ -1215,7 +1454,7 @@ function showImportPreview(pl, fname){
     <div class="sh-hd"><h3 id="im-t">Import preview<small>${esc(fname || "")}</small></h3><button class="iconbtn" id="im-x" type="button">Cancel</button></div>
     <div class="det imp" style="display:grid;gap:12px;padding-top:12px">
       <div class="panel" style="gap:6px"><span class="num">${plural(total, "item")}</span><span>will change. Nothing is saved until you tap Apply.</span>
-        <ul>${pl.minN ? `<li>${plural(pl.minN, "low-stock number")}</li>` : ""}${pl.binN ? `<li>${plural(pl.binN, "bin")} changed</li>` : ""}${pl.usedN ? `<li>${plural(pl.usedN, "Used entry").replace("entrys","entries")}</li>` : ""}${pl.dmgN ? `<li>${plural(pl.dmgN, "Damaged entry").replace("entrys","entries")}</li>` : ""}${!total ? "<li>No changes found in this file.</li>" : ""}</ul></div>
+        <ul>${pl.minN ? `<li>${plural(pl.minN, "low-stock number")}</li>` : ""}${pl.binN ? `<li>${plural(pl.binN, "bin")} changed</li>` : ""}${pl.infoN ? `<li>${plural(pl.infoN, "item")} with new part number, supplier or value</li>` : ""}${pl.usedN ? `<li>${plural(pl.usedN, "Used entry").replace("entrys","entries")}</li>` : ""}${pl.dmgN ? `<li>${plural(pl.dmgN, "Damaged entry").replace("entrys","entries")}</li>` : ""}${!total ? "<li>No changes found in this file.</li>" : ""}</ul></div>
       ${pl.errors.length || pl.unknown.length ? `<div class="panel" style="border-color:var(--bad);gap:6px"><b>Skipped</b><ul>${pl.unknown.length ? `<li>${plural(pl.unknown.length, "code")} not found: ${esc(pl.unknown.slice(0, 6).join(", "))}${pl.unknown.length > 6 ? "…" : ""}</li>` : ""}${pl.errors.slice(0, 8).map(e => `<li>${esc(e)}</li>`).join("")}${pl.errors.length > 8 ? `<li>…and ${pl.errors.length - 8} more</li>` : ""}</ul></div>` : ""}
       <button class="go" id="im-go" type="button" ${total ? "" : "disabled"}>Apply ${total ? plural(total, "change") : ""}</button><div class="err" id="im-err"></div>
     </div></div>`;
@@ -1308,7 +1547,7 @@ function openScan(){
       <div class="manual"><input id="sc-code" placeholder="Or type a code, e.g. SUS-7K3Q" autocomplete="off" autocapitalize="characters" enterkeyhint="go"><button class="btn" id="sc-open" type="button">Open</button></div>
     </div></div>`;
   $("#sc-x").onclick = closePicker;
-  const openCode = c => { const code = codeFrom(c); const it = S.items.find(i => i.code === code); if (!it) return false; closePicker(); setTab("stock"); openItem(it.id); return true; };
+  const openCode = c => openByCode(codeFrom(c));
   $("#sc-open").onclick = () => { if (!openCode($("#sc-code").value)) $("#sc-msg").textContent = "No item with that code."; };
   $("#sc-code").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); $("#sc-open").click(); } };
   const msg = t => { const m = $("#sc-msg"); if (m) m.textContent = t; };
@@ -1341,7 +1580,9 @@ function openScan(){
 
 /* ---------- batch labels ---------- */
 function openLabels(){
-  const list = (S.shown || []).slice();
+  // serialized parts get one label per unit (not retired)
+  const list = [];
+  for (const it of (S.shown || [])) { if (isSerialCat(it.category_id)) unitsOf(it.id).filter(u => u.status !== "retired").forEach(u => list.push([it, { code:u.code, line2:"SN " + u.serial }])); else list.push([it]); }
   const sc = $("#scrim"); sc.hidden = false;
   let fmt = store.get("labelfmt") || "roll";
   const render = () => {
@@ -1371,15 +1612,15 @@ async function makeLabelPdf(list, fmt){
     let doc;
     if (fmt === "roll") {
       doc = new jsPDF({ orientation:"landscape", unit:"in", format:[3.5, 1.5] });
-      list.forEach((it, i) => { if (i) doc.addPage([3.5, 1.5], "landscape"); doc.addImage(labelCanvas(it).toDataURL("image/png"), "PNG", 0, 0, 3.5, 1.5); });
+      list.forEach(([it, o], i) => { if (i) doc.addPage([3.5, 1.5], "landscape"); doc.addImage(labelCanvas(it, o).toDataURL("image/png"), "PNG", 0, 0, 3.5, 1.5); });
     } else {
       // Avery 5163: 2 columns x 5 rows of 4 x 2 in labels on letter paper
       doc = new jsPDF({ orientation:"portrait", unit:"in", format:"letter" });
       const left = 0.156, top = 0.5, w = 4, h = 2, gap = 0.188, ih = w * 450 / 1050;
-      list.forEach((it, i) => {
+      list.forEach(([it, o], i) => {
         const k = i % 10; if (i && !k) doc.addPage("letter", "portrait");
         const col = k % 2, row = Math.floor(k / 2);
-        doc.addImage(labelCanvas(it).toDataURL("image/png"), "PNG", left + col * (w + gap), top + row * h + (h - ih) / 2, w, ih);
+        doc.addImage(labelCanvas(it, o).toDataURL("image/png"), "PNG", left + col * (w + gap), top + row * h + (h - ih) / 2, w, ih);
       });
     }
     const blob = doc.output("blob");
@@ -1412,6 +1653,8 @@ $("#bin").value = S.bin;
 $("#bin").oninput = () => { S.bin = $("#bin").value; store.set("bin", S.bin.trim()); };
 $("#bin").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); $("#bin").blur(); } };
 $("#qty").onclick = focusQty;
+$("#serial").addEventListener("input", () => renderForm());
+$("#serial").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); if (!$("#enter").disabled) enter(); else toast($("#enter-s").textContent, null, null, true); } });
 $("#q-minus").onclick = () => setQty(Math.max(0, qtyVal() - 1) || "");
 $("#q-plus").onclick = () => setQty(qtyVal() + 1);
 // keys act on press (pointerdown) for instant response; the click that follows is swallowed
@@ -1495,7 +1738,7 @@ renderAll(); syncUI();
 const SB_URL = "https://osbjpkhxerztakdqdyql.supabase.co";
 // public "anon" key: safe to ship in the page; data is protected by sign-in + row level security
 const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zYmpwa2h4ZXJ6dGFrZHFkeXFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI0NDM4NTEsImV4cCI6MjEwODAxOTg1MX0.Oqoxce8m96Y_6s0E3NqKYI9FQ8sfWmzq2EQFMX9b-vE";
-const TABLES = ["categories","parts","sizes","items","moves","locations"];
+const TABLES = ["categories","parts","sizes","items","moves","locations","units","unit_log"];
 const LEVELS = { disabled:"No access", viewer:"View only", editor:"Editor", admin:"Master admin" };
 const sb = window.supabase ? window.supabase.createClient(SB_URL, SB_KEY, { auth:{ persistSession:true, autoRefreshToken:true, detectSessionInUrl:false, storageKey:"race-inv-auth" } }) : null;
 
@@ -1589,7 +1832,8 @@ function makeDb(){
 // photos go to the private "photos" bucket; files are downloaded straight to the device
 const photoStore = {
   async upload(blob, o){
-    const path = `${S.uid}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+    const ext = (o && o.type === "application/pdf") ? "pdf" : "jpg";
+    const path = `${S.uid}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const { error } = await sb.storage.from("photos").upload(path, blob, { contentType:(o && o.type) || "image/jpeg", upsert:false });
     if (error) throw error;
     return { id:path, url:URL.createObjectURL(blob), sizeBytes:blob.size };
@@ -1670,7 +1914,7 @@ async function callUsers(body){
 const initials = n => (String(n || "").trim().split(/\s+/).map(w => w[0]).join("").slice(0, 2) || "?").toUpperCase();
 const makePassword = () => { const a = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"; return Array.from(crypto.getRandomValues(new Uint8Array(10)), b => a[b % a.length]).join(""); };
 
-const APP_VERSION = "2.5 · Oct 19, 2026";
+const APP_VERSION = "2.6 · Oct 19, 2026";
 // small screen report for troubleshooting layout on phones
 function screenInfo(){
   const app = (window.navigator.standalone || matchMedia("(display-mode: standalone)").matches) ? "home-screen app" : "browser";
@@ -1694,6 +1938,8 @@ function openAccount(){
       <div class="mgroup"><h4>Reports</h4>
         <button class="mitem" id="ex-stock" type="button"><span>Stock totals<small>Excel: every item, count per location, last entry and who</small></span>${chev}</button>
         <button class="mitem" id="ex-log" type="button"><span>Full log<small>Excel: every count and move, with date, time and who</small></span>${chev}</button>
+        <button class="mitem" id="ex-units" type="button"><span>Engines & chassis<small>Excel: every unit, status, hours and laps, what's due</small></span>${chev}</button>
+        <button class="mitem" id="ex-ulog" type="button"><span>Engine & chassis log<small>Excel: every race, rebuild, repair and dyno entry</small></span>${chev}</button>
         <button class="mitem" id="mn-labels" type="button"><span>Print QR labels<small>PDF for whatever the Stock tab is showing</small></span>${chev}</button>
       </div>
       <div class="mgroup"><h4>Settings on this phone</h4>
@@ -1716,6 +1962,8 @@ function openAccount(){
   if ($("#mn-dups")) $("#mn-dups").onclick = openDups;
   $("#ex-stock").onclick = () => exportCsv("stock");
   $("#ex-log").onclick = () => exportCsv("log");
+  $("#ex-units").onclick = () => exportUnits("units");
+  $("#ex-ulog").onclick = () => exportUnits("log");
   $("#mn-labels").onclick = () => { closePicker(); setTab("stock"); renderStock(); openLabels(); };
   sc.querySelectorAll("[data-th]").forEach(b => b.onclick = () => {
     store.set("theme", b.dataset.th); applyTheme(b.dataset.th);
@@ -1876,7 +2124,7 @@ async function startApp(session){
   // names for reports (who counted what); not shown on screen
   sb.rpc("team_names").then(({ data }) => { S.names = Object.fromEntries((data || []).map(r => [r.id, r.full_name])); }).catch(() => {});
   if (me.role === "viewer") setTab("stock");
-  const map = { categories:"cats", parts:"parts", sizes:"sizes", items:"items", moves:"moves", locations:"locs" };
+  const map = { categories:"cats", parts:"parts", sizes:"sizes", items:"items", moves:"moves", locations:"locs", units:"units", unit_log:"ulog" };
   let opened = false;
   for (const [coll, key] of Object.entries(map)){
     S.db.collection(coll).onSnapshot(snap => {
@@ -1894,9 +2142,7 @@ function openFromHash(){
   const code = decodeURIComponent((location.hash || "").slice(1)).trim().toUpperCase();
   if (!code) return;
   try { history.replaceState(null, "", location.pathname); } catch {}
-  const it = S.items.find(i => i.code === code);
-  if (it) { setTab("stock"); openItem(it.id); }
-  else toast(`No item with code ${code}`, null, null, true);
+  if (!openByCode(code)) toast(`No item with code ${code}`, null, null, true);
 }
 window.addEventListener("hashchange", () => { if (S.loaded.size === TABLES.length) openFromHash(); });
 window.addEventListener("offline", () => { $("#nodb").hidden = false; });
