@@ -151,13 +151,27 @@ Speed is the top requirement. Any change must keep these behaviors:
 - Tap an item: code, QR, qty per location, photo, home bin (editable), full history with delete, **Count more**, **Move** (Editor+: from/to location with on-hand counts, how many, blocks moving more than is there; saved as two linked `transfer` rows, −qty at From and +qty at To, sharing a `transfer_id`; Undo or deleting either row removes both), **Save QR label** (PNG, 1050×450, sized for 3.5×1.5 in labels), **Delete item** (two taps; removes the item and its entries from inventory, keeps the part name in the list).
 - Exports and label printing are in the **Menu** (section 5a).
 
+## 5b. Fixing mistakes, low stock, Used/Damaged, bulk changes (v2.5)
+
+**Rule:** none of this touches the Count screen. The only thing that can appear while counting is the duplicate prompt below, and only when a near-identical part already exists.
+
+- **Duplicate prompt when adding a part:** before creating a new part, the app checks every category for the same or a similar name (ignores case, spaces, hyphens, plural "s", and catches short forms like "Carb" vs "Carburetor"). If found, it offers **Use Engine › Carburetor** or **Add "Carb" to Fuel anyway**.
+- **Find duplicate parts** (Menu → Master admin): groups same/similar part names across all categories. Tap **Keep** on the right one, tap again to confirm, and the others merge into it.
+- **Merge parts** (master admin, run from the app in order): each item of the merged part moves to the kept part. Sizes line up by name (missing sizes move over). If the kept part already has the same part+size item, the two items are merged: all counts/history move to the kept item, which fills in a blank bin, photo or low-stock number from the other, then the extra item is removed. Finally the merged part is removed.
+- **Fix** (item screen, Editor+): pick Category, Part (or "＋ New part '<same name>' here") and Size (or "＋ New size"). Counts and history stay with the item. If the result is identical to an existing item, a Master admin is offered **Merge into CODE**; an Editor is told to ask a master admin.
+- **Used / Damaged** (item screen, Editor+): Used or Damaged, take from a location (shows on-hand), how many (can't exceed what's there), optional note. Saved as a negative `used`/`damaged` move. Undo on the toast.
+- **Keep at least** (low stock): on the item screen next to Home bin, with a single Save. Stock rows show a red **Low** tag when the total across all locations is below it; a **Low (N)** filter chip appears when anything is low. Stock export has "Keep at least" and "Low" columns.
+- **Quick edit** (Stock tab → **Edit**, Editor+): every row gets Keep at least / Used / Damaged boxes; pick which location Used/Damaged come out of; changed boxes turn red; one **Save N changes** button at the bottom (or Cancel). Won't save if a Used/Damaged number is more than what's in that location. Works with search and filters.
+- **Bulk edit sheet** (Menu → Bulk changes, Editor+): **Download** makes a CSV (opens in Excel) with Code, Category, Part, Size, Bin, a column per location, Total, Keep at least, Used, Damaged, Take from, Note. Fill in what you need and **Import** it (CSV or Excel .xlsx). A preview lists what will change and what's skipped (unknown codes, non-numbers, taking more than is there); nothing changes until **Apply**. A blank Bin cell clears the bin; a blank Keep at least clears it. Applied through the database function `bulk_apply` in batches of 150.
+
 ## 5a. Menu (tap your initials, top right)
 
 - **Counting** (Editor+): Recent entries (last 25 counts with Undo; has a Menu button to go back).
+- **Bulk changes** (Editor+): Download bulk edit sheet, Import bulk edit sheet.
 - **Reports:** Stock totals (Excel), Full log (Excel), Print QR labels (opens Labels for whatever Stock is showing).
 - **Settings on this phone:** Theme (Auto / Light / Dark), "Open the part list after Enter" (on by default; Editors+ only). Saved per phone.
-- **Team** (Master admin): Manage users.
-- **Account:** Change my password, Sign out. App version and screen report at the bottom (currently 2.4).
+- **Master admin:** Manage users, Find duplicate parts.
+- **Account:** Change my password, Sign out. App version and screen report at the bottom (currently 2.5).
 
 ## 6. QR / label rules
 
@@ -213,6 +227,9 @@ create view public.stock with (security_invoker) as select item_id, location_id,
 
 -- RLS on every table: select can_read(); insert/update can_edit(); delete is_admin() (moves: can_edit())
 -- team_names(): id + name of every profile, only for viewer+; used for the "By" columns in exports
+-- items.min_qty int (Keep at least / low stock)
+-- bulk_apply(changes jsonb): editor+; per item: min_qty, bin, used, damaged, location_id, note -> updates items and adds used/damaged moves
+-- Merges run from the app (supabase-part.js mergeItems / mergeParts) because migrations containing deletes need an approval step that doesn't reach the phone
 -- storage bucket 'photos' (private): read can_read(), upload can_edit(), delete is_admin()
 -- realtime publication: locations, categories, parts, sizes, items, moves
 ```
@@ -223,7 +240,7 @@ Phase 4 tables still to add: `tracks (id, name, track_type)`, `kits (id, name, t
 
 ## 9. Testing
 
-After every change, run a full tap-through test on a phone-sized touch screen with a stand-in for Supabase that enforces the same permission rules: first-admin setup, sign in (wrong and right password), every picker, Add new, Edit list rename/delete, number pad keys (fast double taps, Back, Clear, Close, tap-outside), +/−, bin, note, photo, Enter, both Undos, Stock search and filters, item sheet (QR link, bin, label, Count more, history delete, Delete item), Export, Users screen (add, duplicate email, change level, last-admin guard, reset password, remove), change own password, sign out, View only and Editor restrictions, No access screen, opening a QR link, light and dark theme, no sideways scrolling, no script errors. Also: Scan (camera finds a label, unknown code, typed code, camera stops on Close), Move (over-limit blocked, both rows written and linked, Undo and history delete remove both, not in Just counted), label PDFs in both formats for exactly what Stock shows, export columns for who and when. Also: saves arrive in order (the stand-in database enforces the same links between tables and answers in random order like a phone connection), status hidden when saved, Menu reports/theme/setting. The latest run passed 57/57 checks. Proven: the version before this fix lost 5 of 6 rapid new-item counts in the same test; the fixed version saved 6 of 6.
+After every change, run a full tap-through test on a phone-sized touch screen with a stand-in for Supabase that enforces the same permission rules: first-admin setup, sign in (wrong and right password), every picker, Add new, Edit list rename/delete, number pad keys (fast double taps, Back, Clear, Close, tap-outside), +/−, bin, note, photo, Enter, both Undos, Stock search and filters, item sheet (QR link, bin, label, Count more, history delete, Delete item), Export, Users screen (add, duplicate email, change level, last-admin guard, reset password, remove), change own password, sign out, View only and Editor restrictions, No access screen, opening a QR link, light and dark theme, no sideways scrolling, no script errors. Also: Scan (camera finds a label, unknown code, typed code, camera stops on Close), Move (over-limit blocked, both rows written and linked, Undo and history delete remove both, not in Just counted), label PDFs in both formats for exactly what Stock shows, export columns for who and when. Also: saves arrive in order (the stand-in database enforces the same links between tables and answers in random order like a phone connection), status hidden when saved, Menu reports/theme/setting. Also: the Count screen has exactly the same controls as before (checked by id), duplicate prompt, Find duplicates merge (totals add up), Fix to another category, Fix into an existing item (merge), Used/Damaged limits and Undo, Keep at least + Low tag + Low filter, Quick edit with limit check, bulk sheet download → edit → import preview → apply, Editor and View only restrictions. The latest run passed 68/68 checks. Proven: the version before this fix lost 5 of 6 rapid new-item counts in the same test; the fixed version saved 6 of 6.
 
 ## 10. How to continue in a new chat
 
@@ -237,6 +254,7 @@ The code is `index.html` in the `hititautosport/Race-inventory` GitHub repo; thi
 
 ## 11. Changelog
 
+- **2026-10-19** — v2.5: duplicate-part prompt, Find duplicate parts + merge, Fix item, Used/Damaged, Keep at least with Low tag/filter, Stock quick edit, bulk edit sheet export/import with preview. Count screen unchanged. 68/68 checks passed.
 - **2026-10-19** — Stock list: category headings bigger and brighter, part names smaller.
 - **2026-10-19** — v2.4: home-screen app status bar switched to solid black to remove the dead strip under Enter; screen report added under the version in the Menu.
 - **2026-10-19** — Count screen simplified: Just counted list moved to Menu → Recent entries (last 25, with Undo); Location and Bin / shelf moved to the bottom. 57/57 checks passed.

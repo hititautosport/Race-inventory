@@ -187,7 +187,7 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
 #stock .row .q{font-size:20px}
 
 /* stock toolbar */
-.tools{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px}
+.tools{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-bottom:8px}
 .search{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:0 12px;min-width:0}
 .search svg{width:18px;height:18px;color:var(--muted);flex:none}
 .search input{border:0;background:transparent;height:44px;width:100%;min-width:0;outline:0}
@@ -274,6 +274,37 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
 .movebox .lbl2{font:600 11px/1.2 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .movebox .fld{display:grid;gap:6px}
 
+/* low stock */
+.lowtag{font:700 10.5px/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--bad);border-radius:999px;padding:4px 7px}
+
+/* quick edit (Stock) */
+.qehead{display:grid;gap:8px;background:var(--sunk);border:2px solid var(--accent);border-radius:16px;padding:12px 14px;margin:6px 0 4px}
+.qehead .r{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.qehead select{height:42px;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:0 10px;color:var(--ink)}
+.qerow{display:grid;grid-template-columns:1fr;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line)}
+.qerow:last-child{border-bottom:0}
+.qerow .nm{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.qerow .nm b{font-size:14px;min-width:0;overflow-wrap:anywhere}
+.qerow .nm span{font-size:12.5px;color:var(--muted);white-space:nowrap}
+.qerow .ins{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.qerow label{display:grid;gap:4px;font:600 10.5px/1 var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.qerow input{height:42px;width:100%;min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--surface);text-align:center;font:700 18px/1 var(--f-display);color:var(--ink)}
+.qerow input.chg{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+.qebar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding-top:10px;padding-bottom:max(10px, calc(env(safe-area-inset-bottom,0px) - 12px))}
+.qebar .wrap{display:grid;grid-template-columns:auto 1fr;gap:8px}
+.qebar .go{height:52px;font-size:20px}
+body.qe main{padding-bottom:110px}
+
+/* duplicates + import */
+.dupg{display:grid;gap:8px;padding:12px 0;border-bottom:1px solid var(--line)}
+.dupg:last-child{border-bottom:0}
+.dupp{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface)}
+.dupp b{display:block}
+.dupp small{color:var(--muted)}
+.imp ul{margin:6px 0 0;padding-left:18px;font-size:14px}
+.imp li{margin:3px 0}
+.imp .num{font:700 22px/1 var(--f-display)}
+
 /* menu */
 .mgroup{display:grid;gap:8px;padding:14px 0;border-bottom:1px solid var(--line)}
 .mgroup:last-child{border-bottom:0}
@@ -351,6 +382,7 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
     <div class="tools">
       <label class="search" for="q"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4-4"/></svg><input id="q" placeholder="Search part, size, code, bin" autocomplete="off"></label>
       <button class="btn" id="b-labels" type="button">Labels</button>
+      <button class="btn need-edit" id="b-qe" type="button">Edit</button>
     </div>
     <div class="seg" id="locf"></div>
     <div class="sum" id="sum"></div>
@@ -358,6 +390,7 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
   </section>
 </main>
 
+<div class="qebar" id="qebar" hidden><div class="wrap"><button class="btn" id="qe-cancel" type="button" style="height:52px">Cancel</button><button class="go" id="qe-save" type="button" disabled>No changes yet</button></div></div>
 <div class="enterbar" id="enterbar"><div class="wrap">
   <div class="keypad" id="keypad" hidden>
     <div class="kp-top"><span class="kp-what" id="kp-what">Quantity</span><output class="kp-num" id="kp-num" aria-live="polite">0</output><button type="button" data-k="close" class="kp-x" aria-label="Close number pad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>Close</button></div>
@@ -732,7 +765,22 @@ function openPartPicker(){
     title:"Part", sub:catName(cat), current:S.sel.part,
     get:() => S.parts.filter(p => p.category_id === cat).sort(byName).map(p => { const n = S.sizes.filter(z => z.part_id === p.id).length; return { id:p.id, label:p.name, meta: n ? n + " sizes" : "" }; }),
     onPick:id => { S.sel.part = id; S.sel.size = null; renderForm(); afterPart(false); },
-    onAdd:name => { const id = mkDoc("parts", { name, category_id:cat }); S.sel.part = id; S.sel.size = null; renderForm(); setTimeout(() => afterPart(true), 50); },
+    onAdd:name => {
+      const addHere = () => { const id = mkDoc("parts", { name, category_id:cat }); S.sel.part = id; S.sel.size = null; renderForm(); setTimeout(() => afterPart(true), 50); };
+      const twins = S.parts.filter(p => similar(p.name, name));
+      if (!twins.length) return addHere();
+      // same or similar part already exists (maybe in another category): offer it first
+      const sc = $("#scrim"); sc.hidden = false;
+      sc.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="tw-t"><div class="sh-hd"><h3 id="tw-t">Already on the list?<small>“${esc(name)}” looks like a part you have</small></h3><button class="iconbtn" id="tw-x" type="button">Close</button></div>
+        <div class="det" style="display:grid;gap:8px;padding-top:12px">${twins.map(p => `<button class="mitem" type="button" data-use="${esc(p.id)}"><span>Use ${esc(catName(p.category_id))} › ${esc(p.name)}<small>${plural(S.items.filter(i => i.part_id === p.id).length, "item")} already counted</small></span><span class="chev">›</span></button>`).join("")}
+        <button class="btn" id="tw-add" type="button" style="height:48px">Add “${esc(name)}” to ${esc(catName(cat))} anyway</button></div></div>`;
+      $("#tw-x").onclick = closePicker;
+      $("#tw-add").onclick = () => { closePicker(); addHere(); };
+      sc.querySelectorAll("[data-use]").forEach(b => b.onclick = () => {
+        const p = find(S.parts, b.dataset.use); closePicker();
+        S.sel.cat = p.category_id; store.set("cat", p.category_id); S.sel.part = p.id; S.sel.size = null; renderForm(); afterPart(false);
+      });
+    },
     onRename:(id, n) => renameDoc("parts", id, n),
     onDelete:id => { const n = partName(id); runPlan(deletePlan({ parts:[id] })); toast(`Deleted ${n}`); },
     impact:id => describePlan(deletePlan({ parts:[id] }), "parts"),
@@ -781,17 +829,22 @@ function renderStock(){
   const t = totals();
   $("#stock-n").textContent = S.items.length;
   const locs = S.locs.slice().sort((a,b) => (a.sort ?? 999) - (b.sort ?? 999) || byName(a,b));
-  $("#locf").innerHTML = [`<button type="button" data-lf="all" aria-pressed="${S.locFilter==="all"}">All</button>`].concat(locs.map(l => `<button type="button" data-lf="${esc(l.id)}" aria-pressed="${S.locFilter===l.id}">${esc(l.name)}</button>`)).join("");
+  const lowN = S.items.filter(it => isLow(it, t.get(it.id))).length;
+  if (S.locFilter === "low" && !lowN) S.locFilter = "all";
+  $("#locf").innerHTML = [`<button type="button" data-lf="all" aria-pressed="${S.locFilter==="all"}">All</button>`].concat(locs.map(l => `<button type="button" data-lf="${esc(l.id)}" aria-pressed="${S.locFilter===l.id}">${esc(l.name)}</button>`), lowN ? [`<button type="button" data-lf="low" aria-pressed="${S.locFilter==="low"}" style="${S.locFilter==="low" ? "" : "color:var(--bad);border-color:var(--bad)"}">Low (${lowN})</button>`] : []).join("");
   const nq = norm(S.q);
   const rows = S.items.map(it => {
     const o = t.get(it.id) || {};
-    const qty = S.locFilter === "all" ? Object.values(o).reduce((a,b) => a+b, 0) : (o[S.locFilter] || 0);
+    const qty = (S.locFilter === "all" || S.locFilter === "low") ? Object.values(o).reduce((a,b) => a+b, 0) : (o[S.locFilter] || 0);
     return { it, qty, hay: norm([catName(it.category_id), partName(it.part_id), sizeName(it.size_id), it.code, it.bin].join(" ")) };
-  }).filter(r => !nq || r.hay.includes(nq)).filter(r => S.locFilter === "all" || r.qty !== 0);
+  }).filter(r => !nq || r.hay.includes(nq)).filter(r => S.locFilter === "all" || (S.locFilter === "low" ? isLow(r.it, t.get(r.it.id)) : r.qty !== 0));
   S.shown = rows.map(r => r.it);
   const units = rows.reduce((a,r) => a + r.qty, 0);
   $("#sum").textContent = rows.length ? `${rows.length} item${rows.length>1?"s":""} · ${units} pieces` : "";
   const el = $("#stock");
+  // don't redraw under someone's thumb while they're typing in quick edit
+  if (S.qe && el.contains(document.activeElement)) { S.qePending = true; return; }
+  S.qePending = false;
   if (!S.items.length){ el.innerHTML = `<div class="list"><div class="empty"><strong>No stock yet</strong>Everything you enter on the Count tab adds up here, grouped by category, with a QR code for each item.</div></div>`; return; }
   if (!rows.length){ el.innerHTML = `<div class="list"><div class="empty"><strong>No matches</strong>Try a different word, or switch the location filter to All.</div></div>`; return; }
   const groups = new Map();
@@ -799,9 +852,17 @@ function renderStock(){
   const order = [...groups.keys()].sort((a,b) => { const A = find(S.cats,a), B = find(S.cats,b); return (A?.sort ?? 999) - (B?.sort ?? 999) || catName(a).localeCompare(catName(b)); });
   el.innerHTML = order.map(k => {
     const g = groups.get(k).sort((a,b) => itemTitle(a.it).localeCompare(itemTitle(b.it), undefined, {numeric:true}));
+    if (S.qe) return `<div class="grp"><span>${esc(catName(k))}</span><span>${g.reduce((a,r)=>a+r.qty,0)}</span></div><div class="list">` + g.map(r => {
+      const d = S.qeDraft[r.it.id] || {}, minV = d.min !== undefined ? d.min : (r.it.min_qty ?? "");
+      return `<div class="qerow" data-qe="${esc(r.it.id)}"><div class="nm"><b>${esc(itemTitle(r.it))}</b><span>${esc(r.it.code)} · ${r.qty} on hand</span></div><div class="ins">
+        <label>Keep at least<input data-f="min" inputmode="numeric" pattern="[0-9]*" value="${esc(minV)}" class="${d.min !== undefined ? "chg" : ""}" aria-label="Keep at least for ${esc(itemTitle(r.it))}"></label>
+        <label>Used<input data-f="used" inputmode="numeric" pattern="[0-9]*" value="${esc(d.used || "")}" placeholder="0" class="${d.used ? "chg" : ""}" aria-label="Used for ${esc(itemTitle(r.it))}"></label>
+        <label>Damaged<input data-f="damaged" inputmode="numeric" pattern="[0-9]*" value="${esc(d.damaged || "")}" placeholder="0" class="${d.damaged ? "chg" : ""}" aria-label="Damaged for ${esc(itemTitle(r.it))}"></label></div></div>`;
+    }).join("") + `</div>`;
     return `<div class="grp"><span>${esc(catName(k))}</span><span>${g.reduce((a,r)=>a+r.qty,0)}</span></div><div class="list">` + g.map(r =>
-      `<button class="row ${r.qty ? "" : "zero"}" type="button" data-item="${esc(r.it.id)}"><div><div class="t">${esc(itemTitle(r.it))}</div><div class="m"><span class="code">${esc(r.it.code)}</span>${r.it.bin ? `<span>${esc(r.it.bin)}</span>` : ""}${r.it.photo ? "<span>photo</span>" : ""}</div></div><div class="q">${r.qty}</div></button>`).join("") + `</div>`;
+      `<button class="row ${r.qty ? "" : "zero"}" type="button" data-item="${esc(r.it.id)}"><div><div class="t">${esc(itemTitle(r.it))}</div><div class="m"><span class="code">${esc(r.it.code)}</span>${r.it.bin ? `<span>${esc(r.it.bin)}</span>` : ""}${r.it.photo ? "<span>photo</span>" : ""}${isLow(r.it, t.get(r.it.id)) ? '<span class="lowtag">Low</span>' : ""}</div></div><div class="q">${r.qty}</div></button>`).join("") + `</div>`;
   }).join("");
+  if (S.qe) el.insertAdjacentHTML("afterbegin", `<div class="qehead"><b>Quick edit</b><div class="r"><span>Used and Damaged come out of</span><select id="qe-loc" aria-label="Take Used and Damaged from">${locs.map(l => `<option value="${esc(l.id)}" ${l.id === S.qeLoc ? "selected" : ""}>${esc(l.name)}</option>`).join("")}</select></div><span class="hint" style="padding:0">Search first to narrow the list. Changed boxes turn red. Nothing saves until you tap Save.</span></div>`);
 }
 
 function openItem(id){
@@ -809,19 +870,35 @@ function openItem(id){
   const t = totals().get(id) || {};
   const ms = S.moves.filter(m => m.item_id === id).sort((a,b) => (b.ts||0) - (a.ts||0));
   const sc = $("#scrim"); sc.hidden = false;
-  const locRows = Object.entries(t).filter(([,v]) => v).map(([l,v]) => `<dt>${esc(locName(l))}</dt><dd>${v}</dd>`).join("") || `<dt>Total</dt><dd>0</dd>`;
+  const locRows = (Object.entries(t).filter(([,v]) => v).map(([l,v]) => `<dt>${esc(locName(l))}</dt><dd>${v}</dd>`).join("") || `<dt>Total</dt><dd>0</dd>`)
+    + (it.min_qty != null ? `<dt>Keep at least</dt><dd>${esc(it.min_qty)} ${isLow(it, t) ? '<span class="lowtag">Low</span>' : ""}</dd>` : "");
   sc.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="it-t">
     <div class="sh-hd"><h3 id="it-t">${esc(itemTitle(it))}<small>${esc(catName(it.category_id))}</small></h3><button class="iconbtn" id="it-x" type="button">Close</button></div>
     <div class="det">
       <div class="top"><dl class="kv"><dt>Code</dt><dd><span class="code" style="font-size:14px">${esc(it.code)}</span></dd>${locRows}</dl><div class="qr" id="it-qr" aria-label="QR code for ${esc(it.code)}"></div></div>
       ${it.photo ? `<img class="photo" data-photo="${esc(it.photo)}" alt="Photo of ${esc(itemTitle(it))}">` : ""}
-      <div class="binedit need-edit"><input id="it-bin" value="${esc(it.bin || "")}" placeholder="Home bin / shelf" aria-label="Home bin"><button class="btn" id="it-binsave" type="button">Save bin</button></div>
-      <div class="actions"><button class="btn primary need-edit" id="it-count" type="button">Count more</button><button class="btn need-edit" id="it-move" type="button">Move</button><button class="btn" id="it-label" type="button">Save QR label</button><button class="btn danger need-admin" id="it-del" type="button">Delete item</button></div>
+      <div class="need-edit" style="display:flex;gap:8px;margin:12px 0 -6px;font:600 11px/1.2 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)"><span style="flex:1">Home bin / shelf</span><span style="width:120px">Keep at least</span><span style="width:64px"></span></div>
+      <div class="binedit need-edit"><input id="it-bin" value="${esc(it.bin || "")}" placeholder="Home bin / shelf" aria-label="Home bin"><input id="it-min" value="${it.min_qty != null ? esc(it.min_qty) : ""}" placeholder="Keep at least" aria-label="Keep at least (low stock number)" inputmode="numeric" pattern="[0-9]*" style="max-width:120px"><button class="btn" id="it-binsave" type="button">Save</button></div>
+      <div class="actions"><button class="btn primary need-edit" id="it-count" type="button">Count more</button><button class="btn need-edit" id="it-move" type="button">Move</button><button class="btn need-edit" id="it-use" type="button">Used / Damaged</button><button class="btn need-edit" id="it-fix" type="button">Fix</button><button class="btn" id="it-label" type="button">Save QR label</button><button class="btn danger need-admin" id="it-del" type="button">Delete item</button></div>
       <div class="why" id="it-delwhy" hidden style="margin-top:8px;font-size:13px;color:var(--bad);font-weight:600"></div>
       <div class="movebox" id="it-movebox" hidden>
         <div class="mvrow"><label class="fld"><span class="lbl2">From</span><select id="mv-from"></select></label><span class="arrow">→</span><label class="fld"><span class="lbl2">To</span><select id="mv-to"></select></label></div>
         <div class="fld"><span class="lbl2">How many <span id="mv-have"></span></span><div class="stepper"><button type="button" id="mv-minus" aria-label="Minus one">−</button><input id="mv-qty" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="How many to move"><button type="button" id="mv-plus" aria-label="Plus one">+</button></div></div>
         <button class="go" id="mv-go" type="button">Move</button><div class="err" id="mv-err"></div>
+      </div>
+      <div class="movebox" id="it-usebox" hidden>
+        <div class="seg3" style="grid-template-columns:1fr 1fr" role="group" aria-label="Used or damaged"><button type="button" data-ut="used" aria-pressed="true">Used</button><button type="button" data-ut="damaged" aria-pressed="false">Damaged</button></div>
+        <label class="fld"><span class="lbl2">Take from</span><select id="ud-from"></select></label>
+        <div class="fld"><span class="lbl2">How many <span id="ud-have"></span></span><div class="stepper"><button type="button" id="ud-minus" aria-label="Minus one">−</button><input id="ud-qty" inputmode="numeric" pattern="[0-9]*" autocomplete="off" aria-label="How many"><button type="button" id="ud-plus" aria-label="Plus one">+</button></div></div>
+        <label class="fld"><span class="lbl2">Note (optional)</span><input id="ud-note" placeholder="e.g. Bristol, cracked" autocomplete="off" style="height:46px;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:0 12px"></label>
+        <button class="go" id="ud-go" type="button">Take out</button><div class="err" id="ud-err"></div>
+      </div>
+      <div class="movebox" id="it-fixbox" hidden>
+        <p class="hint" style="padding:0">Put this item where it belongs. Its counts and history come with it.</p>
+        <label class="fld"><span class="lbl2">Category</span><select id="fx-cat"></select></label>
+        <label class="fld"><span class="lbl2">Part</span><select id="fx-part"></select></label>
+        <label class="fld"><span class="lbl2">Size / spec</span><select id="fx-size"></select></label>
+        <button class="go" id="fx-go" type="button">Save fix</button><div class="err" id="fx-err"></div><div id="fx-merge"></div>
       </div>
       <h2>History</h2>
       <div class="hist">${ms.map(m => `<div class="row"><div><div class="t">${m.qty > 0 ? "+" : ""}${esc(m.qty)} · ${esc(locName(m.location_id))}${m.type && m.type !== "count" ? " · " + esc(typeName(m.type)) : ""}${m.bin ? " · " + esc(m.bin) : ""}</div><div class="m"><span>${esc(new Date(m.ts || m.at).toLocaleString([], {month:"short", day:"numeric", hour:"numeric", minute:"2-digit"}))}</span>${m.note ? `<span>${esc(m.note)}</span>` : ""}</div></div><span class="confirm need-edit"><button class="undo" type="button" data-mdel="${esc(m.id)}">Delete</button></span></div>`).join("") || `<div class="empty">No entries.</div>`}</div>
@@ -830,7 +907,14 @@ function openItem(id){
   const ph = sc.querySelector("img.photo[data-photo]");
   if (ph) photoSrc(ph.dataset.photo).then(u => { ph.src = u; }).catch(() => { ph.hidden = true; });
   try { if (window.QRCode) new QRCode($("#it-qr"), { text: qrText(it.code), width: 240, height: 240, correctLevel: QRCode.CorrectLevel.M }); else $("#it-qr").hidden = true; } catch { $("#it-qr").hidden = true; }
-  $("#it-binsave").onclick = () => { const v = $("#it-bin").value.trim(); write(() => S.db.doc("items/" + id).update({ bin:v }), "the bin"); toast("Bin saved"); };
+  $("#it-binsave").onclick = () => {
+    const v = $("#it-bin").value.trim(), mraw = $("#it-min").value.trim();
+    if (mraw && !/^\d+$/.test(mraw)) { toast("Keep at least needs a whole number, or leave it blank.", null, null, true); return; }
+    const patch = { bin:v, min_qty: mraw === "" ? null : parseInt(mraw, 10) };
+    write(() => S.db.doc("items/" + id).update(patch), "the item"); toast("Saved"); openItem(id);
+  };
+  $("#it-use").onclick = () => openUse(it, t);
+  $("#it-fix").onclick = () => openFix(it);
   $("#it-count").onclick = () => { S.sel.cat = it.category_id; S.sel.part = it.part_id; S.sel.size = it.size_id || null; store.set("cat", it.category_id); closePicker(); setTab("count"); renderForm(); focusQty(); };
   $("#it-label").onclick = () => saveLabel(it);
   $("#it-move").onclick = () => openMove(it, t);
@@ -900,8 +984,8 @@ async function exportCsv(kind){
     const t = totals();
     const last = new Map();
     for (const m of S.moves) { const p = last.get(m.item_id); if (!p || (m.ts || 0) > (p.ts || 0)) last.set(m.item_id, m); }
-    rows = [["Code","Category","Part","Size","Bin"].concat(locs.map(l => l.name), ["Total","Last entry","Last entry by"])];
-    for (const it of S.items){ const o = t.get(it.id) || {}; const per = locs.map(l => o[l.id] || 0); const lm = last.get(it.id); rows.push([it.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), it.bin || ""].concat(per, [per.reduce((a,b)=>a+b,0), lm ? stamp(lm) : "", lm ? initialsOf(lm.by) : ""])); }
+    rows = [["Code","Category","Part","Size","Bin"].concat(locs.map(l => l.name), ["Total","Keep at least","Low","Last entry","Last entry by"])];
+    for (const it of S.items){ const o = t.get(it.id) || {}; const per = locs.map(l => o[l.id] || 0); const lm = last.get(it.id); rows.push([it.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), it.bin || ""].concat(per, [per.reduce((a,b)=>a+b,0), it.min_qty ?? "", isLow(it, o) ? "LOW" : "", lm ? stamp(lm) : "", lm ? initialsOf(lm.by) : ""])); }
   } else {
     rows = [["Date","Code","Category","Part","Size","Location","Bin","Qty","Type","Note","By","By name"]];
     for (const m of S.moves.slice().sort((a,b) => (a.ts||0)-(b.ts||0))){ const it = find(S.items, m.item_id) || {}; rows.push([stamp(m), it.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), locName(m.location_id), m.bin, m.qty, typeName(m.type), m.note, initialsOf(m.by), nameOf(m.by)]); }
@@ -909,6 +993,256 @@ async function exportCsv(kind){
   const csv = "﻿" + rows.map(r => r.map(csvCell).join(",")).join("\r\n");
   try { await S.downloads.save({ filename:`race-inventory-${kind}-${d}.csv`, data:csv }); closePicker(); toast("Exported"); }
   catch (e) { if (e && e.code !== "declined") toast("Export didn't save. Try again.", null, null, true); }
+}
+
+/* ---------- low stock ---------- */
+const itemTotal = (t) => Object.values(t || {}).reduce((a, b) => a + b, 0);
+const isLow = (it, t) => it.min_qty != null && itemTotal(t) < it.min_qty;
+
+/* ---------- used / damaged ---------- */
+function openUse(it, t){
+  const box = $("#it-usebox"); box.hidden = !box.hidden; if (box.hidden) return;
+  $("#it-movebox").hidden = true; $("#it-fixbox").hidden = true;
+  let kind = "used";
+  const locs = S.locs.slice().sort((a,b) => (a.sort ?? 999) - (b.sort ?? 999) || byName(a,b));
+  const have = l => (t && t[l]) || 0;
+  const best = locs.slice().sort((a,b) => have(b.id) - have(a.id))[0] || locs[0];
+  $("#ud-from").innerHTML = locs.map(l => `<option value="${esc(l.id)}" ${best && l.id === best.id ? "selected" : ""}>${esc(l.name)} (${have(l.id)})</option>`).join("");
+  const q = $("#ud-qty"), err = $("#ud-err");
+  const sync = () => { $("#ud-have").textContent = `(${have($("#ud-from").value)} in ${locName($("#ud-from").value)})`; };
+  q.value = "1"; sync();
+  $("#ud-from").onchange = sync;
+  box.querySelectorAll("[data-ut]").forEach(b => b.onclick = () => { kind = b.dataset.ut; box.querySelectorAll("[data-ut]").forEach(x => x.setAttribute("aria-pressed", String(x === b))); });
+  q.oninput = () => { q.value = q.value.replace(/[^0-9]/g, "").slice(0, 5); };
+  $("#ud-minus").onclick = () => { q.value = String(Math.max(1, (parseInt(q.value, 10) || 1) - 1)); };
+  $("#ud-plus").onclick = () => { q.value = String((parseInt(q.value, 10) || 0) + 1); };
+  $("#ud-go").onclick = () => {
+    err.textContent = "";
+    const f = $("#ud-from").value, n = parseInt(q.value, 10) || 0;
+    if (n <= 0) { err.textContent = "Enter how many."; return; }
+    if (n > have(f)) { err.textContent = `Only ${have(f)} in ${locName(f)}.`; return; }
+    const now = Date.now(), ref = S.db.collection("moves").doc();
+    write(() => ref.set({ item_id:it.id, qty:-n, type:kind, location_id:f, bin:"", note:$("#ud-note").value.trim(), photo:null, by:S.uid, at:new Date(now).toISOString(), ts:now }), "that entry");
+    toast(`${kind === "used" ? "Used" : "Damaged"}: ${n} × ${itemTitle(it)}`, "Undo", () => undoMove(ref.id));
+    openItem(it.id);
+  };
+  setTimeout(() => box.scrollIntoView({ block:"nearest", behavior:"smooth" }), 30);
+}
+
+/* ---------- fix: put an item in the right category / part / size ---------- */
+function openFix(it){
+  const box = $("#it-fixbox"); box.hidden = !box.hidden; if (box.hidden) return;
+  $("#it-movebox").hidden = true; $("#it-usebox").hidden = true;
+  const curPart = partName(it.part_id), curSize = it.size_id ? sizeName(it.size_id) : "";
+  const cats = S.cats.slice().sort((a,b) => (a.sort ?? 999) - (b.sort ?? 999) || byName(a,b));
+  const fc = $("#fx-cat"), fp = $("#fx-part"), fz = $("#fx-size"), err = $("#fx-err"), mg = $("#fx-merge");
+  fc.innerHTML = cats.map(c => `<option value="${esc(c.id)}" ${c.id === it.category_id ? "selected" : ""}>${esc(c.name)}</option>`).join("");
+  const fillParts = keep => {
+    const ps = S.parts.filter(p => p.category_id === fc.value).sort(byName);
+    const same = ps.find(p => norm(p.name) === norm(curPart));
+    fp.innerHTML = (same ? "" : `<option value="__new__">＋ New part “${esc(curPart)}” here</option>`) + ps.map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("");
+    fp.value = keep && ps.some(p => p.id === keep) ? keep : (same ? same.id : "__new__");
+    fillSizes(it.size_id);
+  };
+  const fillSizes = keep => {
+    const zs = fp.value === "__new__" ? [] : S.sizes.filter(z => z.part_id === fp.value).sort(byName);
+    const same = curSize && zs.find(z => norm(z.name) === norm(curSize));
+    fz.innerHTML = `<option value="">No size</option>` + (curSize && !same ? `<option value="__newsize__">＋ New size “${esc(curSize)}”</option>` : "") + zs.map(z => `<option value="${esc(z.id)}">${esc(z.name)}</option>`).join("");
+    fz.value = keep && zs.some(z => z.id === keep) ? keep : (same ? same.id : (curSize ? "__newsize__" : ""));
+  };
+  fillParts(it.part_id);
+  fc.onchange = () => { err.textContent = ""; mg.innerHTML = ""; fillParts(null); };
+  fp.onchange = () => { err.textContent = ""; mg.innerHTML = ""; fillSizes(null); };
+  fz.onchange = () => { err.textContent = ""; mg.innerHTML = ""; };
+  $("#fx-go").onclick = () => {
+    err.textContent = ""; mg.innerHTML = "";
+    const cat = fc.value;
+    if (fp.value !== "__new__" && fp.value === it.part_id && (fz.value || "") === (it.size_id || "")) { err.textContent = "Nothing changed."; return; }
+    // a matching item already there? then it's a merge, not a move
+    const partId0 = fp.value === "__new__" ? null : fp.value;
+    const sizeId0 = fz.value === "__newsize__" ? null : (fz.value || null);
+    const clash = partId0 && fz.value !== "__newsize__" && S.items.find(i => i.id !== it.id && i.part_id === partId0 && (i.size_id || "") === (sizeId0 || ""));
+    if (clash) {
+      if (S.role !== "admin") { err.textContent = `That's already item ${clash.code}. Ask a master admin to merge them.`; return; }
+      mg.innerHTML = `<p class="hint" style="padding:6px 0 0">That's already item <b>${esc(clash.code)}</b> (${esc(itemTitle(clash))}). Merge this one into it? Counts and history move over and ${esc(it.code)} goes away.</p><button class="go" id="fx-merge-go" type="button">Merge into ${esc(clash.code)}</button>`;
+      $("#fx-merge-go").onclick = async () => {
+        const keep = clash.id; closePicker();
+        try { await S.db.run(() => mergeItems(keep, it.id)); toast(`Merged into ${clash.code}`); openItem(keep); }
+        catch (e) { toast(e && e.message ? e.message : "Merge didn't finish. Check signal and try again.", null, null, true); }
+      };
+      return;
+    }
+    const partId = partId0 || mkDoc("parts", { name:curPart, category_id:cat });
+    const sizeId = fz.value === "__newsize__" ? mkDoc("sizes", { name:curSize, part_id:partId }) : sizeId0;
+    write(() => S.db.doc("items/" + it.id).update({ category_id:cat, part_id:partId, size_id:sizeId || null }), "the fix");
+    toast("Fixed"); openItem(it.id);
+  };
+  setTimeout(() => box.scrollIntoView({ block:"nearest", behavior:"smooth" }), 30);
+}
+
+/* ---------- duplicate parts ---------- */
+const dupKey = n => norm(n).replace(/[\s\-\/.]/g, "");
+const similar = (a, b) => { const x = dupKey(a), y = dupKey(b); if (!x || !y) return false; if (x === y) return true; const [s1, l1] = x.length <= y.length ? [x, y] : [y, x]; return s1.length >= 4 && l1.startsWith(s1); };
+function dupGroups(){
+  const ps = S.parts.slice(), parent = new Map(ps.map(p => [p.id, p.id]));
+  const root = id => { while (parent.get(id) !== id) id = parent.get(id); return id; };
+  for (let i = 0; i < ps.length; i++) for (let j = i + 1; j < ps.length; j++) if (similar(ps[i].name, ps[j].name)) parent.set(root(ps[j].id), root(ps[i].id));
+  const g = new Map(); for (const p of ps) { const r = root(p.id); if (!g.has(r)) g.set(r, []); g.get(r).push(p); }
+  return [...g.values()].filter(x => x.length > 1);
+}
+function openDups(){
+  const sc = $("#scrim"); sc.hidden = false;
+  const tt = totals();
+  const groups = dupGroups();
+  const pieces = pid => S.items.filter(i => i.part_id === pid).reduce((a, i) => a + itemTotal(tt.get(i.id)), 0);
+  sc.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="dp-t">
+    <div class="sh-hd"><h3 id="dp-t">Duplicate parts<small>${groups.length ? plural(groups.length, "possible duplicate") : "None found"}</small></h3><button class="iconbtn" id="dp-back" type="button">Menu</button><button class="iconbtn" id="dp-x" type="button">Close</button></div>
+    <div class="det">
+      ${groups.length ? `<p class="hint" style="padding:10px 0 0">Same or similar part names, in any category. Tap <b>Keep</b> on the right one and the others merge into it: their items, counts and history move over.</p>` : `<p class="hint" style="padding:12px 0">No duplicate part names. Nice and clean.</p>`}
+      ${groups.map((g, gi) => `<div class="dupg">${g.map(p => `<div class="dupp"><div><b>${esc(p.name)}</b><small>${esc(catName(p.category_id))} · ${plural(S.items.filter(i => i.part_id === p.id).length, "item")} · ${pieces(p.id)} pieces</small></div><button class="btn" type="button" data-keep="${esc(p.id)}" data-g="${gi}">Keep</button></div>`).join("")}<div class="err" data-gerr="${gi}"></div></div>`).join("")}
+    </div></div>`;
+  $("#dp-x").onclick = closePicker;
+  $("#dp-back").onclick = openAccount;
+  sc.querySelectorAll("[data-keep]").forEach(b => b.onclick = async () => {
+    const g = groups[+b.dataset.g], keep = find(S.parts, b.dataset.keep), others = g.filter(p => p.id !== keep.id);
+    if (!b.dataset.armed) {
+      sc.querySelectorAll(`[data-g="${b.dataset.g}"]`).forEach(x => { delete x.dataset.armed; x.textContent = "Keep"; x.classList.remove("armed"); });
+      b.dataset.armed = "1"; b.textContent = `Merge ${others.length} into this`; b.classList.add("armed"); return;
+    }
+    b.disabled = true; b.textContent = "Merging…";
+    // one merge at a time, with a fresh look at the data between each
+    try { for (const o of others) await S.db.run(() => mergeParts(keep.id, o.id)); toast(`Merged into ${catName(keep.category_id)} › ${keep.name}`); openDups(); }
+    catch (e) { const m = sc.querySelector(`[data-gerr="${b.dataset.g}"]`); if (m) m.textContent = (e && e.message) || "Merge didn't finish. Check signal and try again."; b.disabled = false; b.textContent = "Keep"; }
+  });
+}
+
+/* ---------- bulk edit sheet (spreadsheet round-trip) ---------- */
+function bulkSheetCsv(){
+  const t = totals();
+  const locs = S.locs.slice().sort((a,b) => (a.sort ?? 999) - (b.sort ?? 999) || byName(a,b));
+  const rows = [["Code","Category","Part","Size","Bin"].concat(locs.map(l => l.name), ["Total","Keep at least","Used","Damaged","Take from","Note"])];
+  const items = S.items.slice().sort((a,b) => (catName(a.category_id) + itemTitle(a)).localeCompare(catName(b.category_id) + itemTitle(b), undefined, { numeric:true }));
+  for (const it of items) { const o = t.get(it.id) || {}; const per = locs.map(l => o[l.id] || 0); rows.push([it.code, catName(it.category_id), partName(it.part_id), sizeName(it.size_id), it.bin || ""].concat(per, [per.reduce((a,b)=>a+b,0), it.min_qty ?? "", "", "", "", ""])); }
+  return "\ufeff" + rows.map(r => r.map(csvCell).join(",")).join("\r\n");
+}
+async function downloadBulkSheet(){
+  try { await S.downloads.save({ filename:`race-inventory-bulk-edit-${new Date().toISOString().slice(0,10)}.csv`, data:bulkSheetCsv() }); closePicker(); toast("Bulk edit sheet saved"); }
+  catch (e) { if (e && e.code !== "declined") toast("Couldn't save the sheet.", null, null, true); }
+}
+function parseCsv(text){
+  const rows = []; let row = [], cell = "", q = false;
+  text = String(text).replace(/^\ufeff/, "");
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) { if (ch === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; } else cell += ch; continue; }
+    if (ch === '"') q = true;
+    else if (ch === ",") { row.push(cell); cell = ""; }
+    else if (ch === "\n" || ch === "\r") { if (ch === "\r" && text[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+    else cell += ch;
+  }
+  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(c => String(c).trim() !== ""));
+}
+function loadScript(src){ return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = () => rej(new Error("load")); document.head.appendChild(s); }); }
+async function readSheetFile(file){
+  if (/\.xlsx?$/i.test(file.name)) {
+    if (!window.XLSX) await loadScript("https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js");
+    const wb = window.XLSX.read(await file.arrayBuffer(), { type:"array" });
+    return parseCsv(window.XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]]));
+  }
+  return parseCsv(await file.text());
+}
+function planImport(rows){
+  const out = { changes:[], errors:[], minN:0, binN:0, usedN:0, dmgN:0, unknown:[] };
+  if (!rows.length) { out.errors.push("The file is empty."); return out; }
+  const head = rows[0].map(h => String(h).trim().toLowerCase());
+  const col = name => head.indexOf(name);
+  const ci = col("code");
+  if (ci < 0) { out.errors.push("Couldn't find a Code column. Start from the bulk edit sheet the app makes."); return out; }
+  const cBin = col("bin"), cMin = col("keep at least"), cUsed = col("used"), cDmg = col("damaged"), cFrom = col("take from"), cNote = col("note");
+  const t = totals(), byCode = new Map(S.items.map(i => [String(i.code).toUpperCase(), i]));
+  const locByName = new Map(S.locs.map(l => [norm(l.name), l.id]));
+  const num = v => { v = String(v ?? "").trim(); if (v === "") return 0; return /^\d+$/.test(v) ? parseInt(v, 10) : NaN; };
+  for (let r = 1; r < rows.length; r++) {
+    const row = rows[r], code = String(row[ci] || "").trim().toUpperCase(); if (!code) continue;
+    const it = byCode.get(code); if (!it) { out.unknown.push(code); continue; }
+    const ch = { item_id:it.id }; let any = false; const line = r + 1;
+    if (cBin >= 0) { const v = String(row[cBin] ?? "").trim(); if (v !== (it.bin || "")) { ch.bin = v; out.binN++; any = true; } }
+    if (cMin >= 0) {
+      const v = String(row[cMin] ?? "").trim();
+      if (v !== "" && !/^\d+$/.test(v)) out.errors.push(`Row ${line} (${code}): Keep at least "${v}" isn't a whole number.`);
+      else { const nv = v === "" ? null : parseInt(v, 10); if (nv !== (it.min_qty ?? null)) { ch.min_qty = nv === null ? "" : String(nv); out.minN++; any = true; } }
+    }
+    const used = cUsed >= 0 ? num(row[cUsed]) : 0, dmg = cDmg >= 0 ? num(row[cDmg]) : 0;
+    if (isNaN(used) || isNaN(dmg)) out.errors.push(`Row ${line} (${code}): Used/Damaged must be whole numbers.`);
+    else if (used || dmg) {
+      const fromName = cFrom >= 0 ? String(row[cFrom] ?? "").trim() : "";
+      const loc = fromName ? locByName.get(norm(fromName)) : shopLocId();
+      const have = (t.get(it.id) || {})[loc] || 0;
+      if (!loc) out.errors.push(`Row ${line} (${code}): no location called "${fromName}".`);
+      else if (used + dmg > have) out.errors.push(`Row ${line} (${code}): taking ${used + dmg} but only ${have} in ${locName(loc)}.`);
+      else { if (used) { ch.used = used; out.usedN++; } if (dmg) { ch.damaged = dmg; out.dmgN++; } ch.location_id = loc; if (cNote >= 0) ch.note = String(row[cNote] ?? "").trim(); any = true; }
+    }
+    if (any) out.changes.push(ch);
+  }
+  return out;
+}
+function openImport(){
+  const inp = document.createElement("input"); inp.type = "file"; inp.accept = ".csv,.xlsx,.xls,text/csv";
+  inp.onchange = async () => {
+    const f = inp.files && inp.files[0]; if (!f) return;
+    let rows; try { rows = await readSheetFile(f); } catch { toast("Couldn't read that file. Save it as CSV or Excel and try again.", null, null, true); return; }
+    showImportPreview(planImport(rows), f.name);
+  };
+  inp.click();
+}
+function showImportPreview(pl, fname){
+  const sc = $("#scrim"); sc.hidden = false;
+  const total = pl.changes.length;
+  sc.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="im-t">
+    <div class="sh-hd"><h3 id="im-t">Import preview<small>${esc(fname || "")}</small></h3><button class="iconbtn" id="im-x" type="button">Cancel</button></div>
+    <div class="det imp" style="display:grid;gap:12px;padding-top:12px">
+      <div class="panel" style="gap:6px"><span class="num">${plural(total, "item")}</span><span>will change. Nothing is saved until you tap Apply.</span>
+        <ul>${pl.minN ? `<li>${plural(pl.minN, "low-stock number")}</li>` : ""}${pl.binN ? `<li>${plural(pl.binN, "bin")} changed</li>` : ""}${pl.usedN ? `<li>${plural(pl.usedN, "Used entry").replace("entrys","entries")}</li>` : ""}${pl.dmgN ? `<li>${plural(pl.dmgN, "Damaged entry").replace("entrys","entries")}</li>` : ""}${!total ? "<li>No changes found in this file.</li>" : ""}</ul></div>
+      ${pl.errors.length || pl.unknown.length ? `<div class="panel" style="border-color:var(--bad);gap:6px"><b>Skipped</b><ul>${pl.unknown.length ? `<li>${plural(pl.unknown.length, "code")} not found: ${esc(pl.unknown.slice(0, 6).join(", "))}${pl.unknown.length > 6 ? "…" : ""}</li>` : ""}${pl.errors.slice(0, 8).map(e => `<li>${esc(e)}</li>`).join("")}${pl.errors.length > 8 ? `<li>…and ${pl.errors.length - 8} more</li>` : ""}</ul></div>` : ""}
+      <button class="go" id="im-go" type="button" ${total ? "" : "disabled"}>Apply ${total ? plural(total, "change") : ""}</button><div class="err" id="im-err"></div>
+    </div></div>`;
+  $("#im-x").onclick = closePicker;
+  $("#im-go").onclick = async () => {
+    const go = $("#im-go"); go.disabled = true; go.textContent = "Applying…";
+    try {
+      for (let i = 0; i < pl.changes.length; i += 150) await S.db.rpc("bulk_apply", { changes: pl.changes.slice(i, i + 150) });
+      closePicker(); toast(`Applied ${plural(total, "change")}`);
+    } catch (e) { $("#im-err").textContent = (e && e.message) || "Couldn't apply. Check signal and try again."; go.disabled = false; go.textContent = "Try again"; }
+  };
+}
+
+/* ---------- quick edit on Stock ---------- */
+function setQuickEdit(on){
+  S.qe = on; S.qeDraft = {}; if (!S.qeLoc) S.qeLoc = shopLocId();
+  document.body.classList.toggle("qe", on); $("#qebar").hidden = !on; $("#b-qe").textContent = on ? "Done" : "Edit";
+  qeBarUI(); renderStock();
+}
+function qeChanges(){
+  const out = [], t = totals();
+  for (const [id, d] of Object.entries(S.qeDraft)) {
+    const it = find(S.items, id); if (!it) continue;
+    const ch = { item_id:id }; let any = false;
+    if (d.min !== undefined) { const v = d.min.trim(); const nv = v === "" ? null : parseInt(v, 10); if (v === "" || /^\d+$/.test(v)) { if (nv !== (it.min_qty ?? null)) { ch.min_qty = nv === null ? "" : String(nv); any = true; } } }
+    const used = parseInt(d.used || "0", 10) || 0, dmg = parseInt(d.damaged || "0", 10) || 0;
+    if (used || dmg) { if (used) ch.used = used; if (dmg) ch.damaged = dmg; ch.location_id = S.qeLoc; any = true; ch._have = (t.get(id) || {})[S.qeLoc] || 0; ch._title = itemTitle(it); }
+    if (any) out.push(ch);
+  }
+  return out;
+}
+function qeBarUI(){ const n = qeChanges().length; const b = $("#qe-save"); if (b) { b.textContent = n ? `Save ${plural(n, "change")}` : "No changes yet"; b.disabled = !n; } }
+async function qeSave(){
+  const chs = qeChanges();
+  const short = chs.filter(c => (c.used || 0) + (c.damaged || 0) > c._have);
+  if (short.length) { toast(`Not enough in ${locName(S.qeLoc)} for ${short[0]._title} (have ${short[0]._have}).`, null, null, true); return; }
+  const b = $("#qe-save"); b.disabled = true; b.textContent = "Saving…";
+  try { await S.db.rpc("bulk_apply", { changes: chs.map(c => { const o = Object.assign({}, c); delete o._have; delete o._title; return o; }) }); toast(`Saved ${plural(chs.length, "change")}`); setQuickEdit(false); }
+  catch (e) { toast((e && e.message) || "Couldn't save. Check signal and try again.", null, null, true); qeBarUI(); }
 }
 
 /* ---------- move between locations ---------- */
@@ -1049,6 +1383,7 @@ async function makeLabelPdf(list, fmt){
 function setTab(tab){
   if (S.role === "viewer") tab = "stock";
   S.tab = tab;
+  if (tab !== "stock" && S.qe) setQuickEdit(false);
   $("#v-count").hidden = tab !== "count"; $("#v-stock").hidden = tab !== "stock"; $("#enterbar").hidden = tab !== "count";
   document.querySelectorAll(".tab").forEach(b => b.setAttribute("aria-selected", String(b.dataset.tab === tab)));
   keypadUI();
@@ -1113,6 +1448,17 @@ $("#stock").addEventListener("click", e => { const b = e.target.closest("[data-i
 $("#locf").addEventListener("click", e => { const b = e.target.closest("[data-lf]"); if (b) { S.locFilter = b.dataset.lf; renderStock(); } });
 $("#q").oninput = () => { S.q = $("#q").value; renderStock(); };
 $("#b-labels").onclick = openLabels;
+$("#b-qe").onclick = () => setQuickEdit(!S.qe);
+$("#qe-cancel").onclick = () => setQuickEdit(false);
+$("#qe-save").onclick = qeSave;
+$("#stock").addEventListener("input", e => {
+  const inp = e.target.closest("[data-f]"); if (!inp) return;
+  inp.value = inp.value.replace(/[^0-9]/g, "").slice(0, 5);
+  const id = inp.closest("[data-qe]").dataset.qe, d = S.qeDraft[id] = S.qeDraft[id] || {};
+  d[inp.dataset.f] = inp.value; inp.classList.add("chg"); qeBarUI();
+});
+$("#stock").addEventListener("change", e => { if (e.target.id === "qe-loc") { S.qeLoc = e.target.value; qeBarUI(); } });
+$("#stock").addEventListener("focusout", () => setTimeout(() => { if (S.qePending && !$("#stock").contains(document.activeElement)) renderStock(); }, 50));
 $("#scan").onclick = openScan;
 
 /* lock zoom: no pinch, no double-tap, no sideways drift */
@@ -1207,6 +1553,11 @@ function makeDb(){
     };
   }
   const refreshAll = () => Promise.all(TABLES.filter(t => subs[t]).map(t => refresh(t)));
+  // several database steps in a row (merges, bulk changes), in line with every other save
+  async function run(fn){ try { return await inOrder(fn); } finally { await refreshAll().catch(() => {}); } }
+  async function rpc(name, args){
+    return run(async () => { const { data, error } = await sb.rpc(name, args); if (error) throw error; return data; });
+  }
   let first = true;
   const ch = sb.channel("inventory-live");
   TABLES.forEach(t => ch.on("postgres_changes", { event:"*", schema:"public", table:t }, p => {
@@ -1218,7 +1569,7 @@ function makeDb(){
   });
   document.addEventListener("visibilitychange", () => { if (!document.hidden) refreshAll().catch(() => {}); });
   window.addEventListener("online", () => refreshAll().catch(() => {}));
-  return { doc, collection, refreshAll };
+  return { doc, collection, refreshAll, run, rpc };
 }
 
 // photos go to the private "photos" bucket; files are downloaded straight to the device
@@ -1248,6 +1599,49 @@ const fileSaver = {
   }
 };
 
+/* ---------- merges (master admin) ---------- */
+const mustOk = r => { if (r.error) throw r.error; return r.data; };
+// item B into item A: B's counts and history move to A, then B goes away
+async function mergeItems(keepId, dropId){
+  if (keepId === dropId) return;
+  const keep = find(S.items, keepId), drop = find(S.items, dropId);
+  if (!keep || !drop) throw new Error("Item not found. Reload and try again.");
+  mustOk(await sb.from("moves").update({ item_id:keepId }).eq("item_id", dropId));
+  const patch = {};
+  if (!keep.bin && drop.bin) patch.bin = drop.bin;
+  if (!keep.photo && drop.photo) patch.photo = drop.photo;
+  if (keep.min_qty == null && drop.min_qty != null) patch.min_qty = drop.min_qty;
+  if (drop.notes) patch.notes = ((keep.notes || "") + " " + drop.notes).trim();
+  if (Object.keys(patch).length) mustOk(await sb.from("items").update(patch).eq("id", keepId));
+  const gone = mustOk(await sb.from("items").delete().eq("id", dropId).select("id"));
+  if (!gone.length) throw new Error("Only a master admin can merge.");
+}
+// part B into part A (any categories): items move over, sizes line up by name, same item = merged
+async function mergeParts(keepId, dropId){
+  if (keepId === dropId) return;
+  const keep = find(S.parts, keepId); if (!keep) throw new Error("Part not found. Reload and try again.");
+  const sizeKey = n => String(n || "").trim().toLowerCase();
+  const keepSizes = new Map(S.sizes.filter(z => z.part_id === keepId).map(z => [sizeKey(z.name), z.id]));
+  const items = S.items.filter(i => i.part_id === dropId);
+  const keepItems = new Map(S.items.filter(i => i.part_id === keepId).map(i => [i.size_id || "", i.id]));
+  for (const it of items) {
+    let target = null;
+    if (it.size_id) {
+      const nm = sizeName(it.size_id), k = sizeKey(nm);
+      if (keepSizes.has(k)) target = keepSizes.get(k);
+      else { mustOk(await sb.from("sizes").update({ part_id:keepId }).eq("id", it.size_id)); keepSizes.set(k, it.size_id); target = it.size_id; }
+    }
+    const twin = keepItems.get(target || "");
+    if (twin) await mergeItems(twin, it.id);
+    else { mustOk(await sb.from("items").update({ part_id:keepId, category_id:keep.category_id, size_id:target }).eq("id", it.id)); keepItems.set(target || "", it.id); }
+  }
+  for (const z of S.sizes.filter(z => z.part_id === dropId)) {
+    if (!keepSizes.has(sizeKey(z.name))) { mustOk(await sb.from("sizes").update({ part_id:keepId }).eq("id", z.id)); keepSizes.set(sizeKey(z.name), z.id); }
+  }
+  const gone = mustOk(await sb.from("parts").delete().eq("id", dropId).select("id"));
+  if (!gone.length) throw new Error("Only a master admin can merge.");
+}
+
 /* ---------- user management (master admin) ---------- */
 async function callUsers(body){
   const { data, error } = await sb.functions.invoke("manage-users", { body });
@@ -1262,7 +1656,7 @@ async function callUsers(body){
 const initials = n => (String(n || "").trim().split(/\s+/).map(w => w[0]).join("").slice(0, 2) || "?").toUpperCase();
 const makePassword = () => { const a = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"; return Array.from(crypto.getRandomValues(new Uint8Array(10)), b => a[b % a.length]).join(""); };
 
-const APP_VERSION = "2.4 · Oct 19, 2026";
+const APP_VERSION = "2.5 · Oct 19, 2026";
 // small screen report for troubleshooting layout on phones
 function screenInfo(){
   const app = (window.navigator.standalone || matchMedia("(display-mode: standalone)").matches) ? "home-screen app" : "browser";
@@ -1279,6 +1673,10 @@ function openAccount(){
       <div class="mgroup need-edit"><h4>Counting</h4>
         <button class="mitem" id="mn-recent" type="button"><span>Recent entries<small>Your latest counts, with Undo</small></span>${chev}</button>
       </div>
+      <div class="mgroup need-edit"><h4>Bulk changes</h4>
+        <button class="mitem" id="mn-bulk-dl" type="button"><span>Download bulk edit sheet<small>Excel: fill in Keep at least, Used, Damaged, Bin</small></span><span class="chev">›</span></button>
+        <button class="mitem" id="mn-bulk-up" type="button"><span>Import bulk edit sheet<small>Shows a preview before anything changes</small></span><span class="chev">›</span></button>
+      </div>
       <div class="mgroup"><h4>Reports</h4>
         <button class="mitem" id="ex-stock" type="button"><span>Stock totals<small>Excel: every item, count per location, last entry and who</small></span>${chev}</button>
         <button class="mitem" id="ex-log" type="button"><span>Full log<small>Excel: every count and move, with date, time and who</small></span>${chev}</button>
@@ -1288,7 +1686,7 @@ function openAccount(){
         <div class="seg3" role="group" aria-label="Theme">${[["auto","Auto"],["light","Light"],["dark","Dark"]].map(([k,v]) => `<button type="button" data-th="${k}" aria-pressed="${th === k}">${v}</button>`).join("")}</div>
         <div class="mitem need-edit" style="cursor:default"><span>Open the part list after Enter<small>Faster counting. Turn off to stay on the form.</small></span><button class="switch" id="mn-auto" type="button" role="switch" aria-checked="${auto}" aria-label="Open the part list after Enter"></button></div>
       </div>
-      ${S.role === "admin" ? `<div class="mgroup"><h4>Team</h4><button class="mitem" id="ac-users" type="button"><span>Manage users<small>Add people, set their level, reset passwords</small></span>${chev}</button></div>` : ""}
+      ${S.role === "admin" ? `<div class="mgroup"><h4>Master admin</h4><button class="mitem" id="ac-users" type="button"><span>Manage users<small>Add people, set their level, reset passwords</small></span>${chev}</button><button class="mitem" id="mn-dups" type="button"><span>Find duplicate parts<small>Same part in two categories? Merge them</small></span>${chev}</button></div>` : ""}
       <div class="mgroup"><h4>Account</h4>
         <button class="mitem" id="ac-pw" type="button"><span>Change my password</span>${chev}</button>
         <div id="ac-pwbox" hidden><div class="pwrow"><input id="ac-newpw" type="password" placeholder="New password (8+ characters)" autocomplete="new-password"><button class="btn" id="ac-pwsave" type="button">Save</button></div><div class="err" id="ac-err"></div></div>
@@ -1299,6 +1697,9 @@ function openAccount(){
     </div></div>`;
   $("#ac-x").onclick = closePicker;
   $("#mn-recent").onclick = openRecent;
+  $("#mn-bulk-dl").onclick = downloadBulkSheet;
+  $("#mn-bulk-up").onclick = openImport;
+  if ($("#mn-dups")) $("#mn-dups").onclick = openDups;
   $("#ex-stock").onclick = () => exportCsv("stock");
   $("#ex-log").onclick = () => exportCsv("log");
   $("#mn-labels").onclick = () => { closePicker(); setTab("stock"); renderStock(); openLabels(); };
