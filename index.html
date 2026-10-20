@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#101315">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Race Inventory">
 <meta name="robots" content="noindex">
 <title>Race Shop Inventory</title>
@@ -1258,7 +1258,12 @@ async function callUsers(body){
 const initials = n => (String(n || "").trim().split(/\s+/).map(w => w[0]).join("").slice(0, 2) || "?").toUpperCase();
 const makePassword = () => { const a = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"; return Array.from(crypto.getRandomValues(new Uint8Array(10)), b => a[b % a.length]).join(""); };
 
-const APP_VERSION = "2.3 · Oct 19, 2026";
+const APP_VERSION = "2.4 · Oct 19, 2026";
+// small screen report for troubleshooting layout on phones
+function screenInfo(){
+  const app = (window.navigator.standalone || matchMedia("(display-mode: standalone)").matches) ? "home-screen app" : "browser";
+  return `Screen ${screen.width}×${screen.height} · view ${innerWidth}×${innerHeight} · ${app}`;
+}
 function openAccount(){
   const me = S.me || {};
   const sc = $("#scrim"); sc.hidden = false;
@@ -1286,7 +1291,7 @@ function openAccount(){
         <button class="btn danger" id="ac-out" type="button">Sign out</button>
       </div>
       <p class="hint">Tip: add this page to your home screen (Share, then Add to Home Screen) so it opens like an app.</p>
-      <div class="ver">Race Shop Inventory ${APP_VERSION}</div>
+      <div class="ver">Race Shop Inventory ${APP_VERSION}<br>${screenInfo()}</div>
     </div></div>`;
   $("#ac-x").onclick = closePicker;
   $("#mn-recent").onclick = openRecent;
