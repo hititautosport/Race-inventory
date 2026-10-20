@@ -140,6 +140,7 @@ Speed is the top requirement. Any change must keep these behaviors:
 13. Save status in the header is **hidden when everything is saved**. A small grey blinking dot shows while saving. A red **Not saved** pill appears only if a save failed (tap it for help; the error message has Retry).
 16. **Saves go out one at a time, in order.** A new part/item always reaches the database before the count that points at it. (Before 2026-10-19 21:10 a new item and its first count were sent together and the count could arrive first and be rejected by the database's link check.)
 14. Pickers have a red outline and a dark blurred background so they stand out from the page.
+17. **Layout on iPhone:** the window itself scrolls (never the body). The sticky header sits at the very top and pads itself by the status-bar height, so nothing scrolls behind it. The Enter bar sits at the bottom with only a small gap above the home bar. Don't put `overflow` on `body` or padding on `:root`/`html`; it doubles the safe-area space.
 15. Zoom is locked: no pinch zoom, no double-tap zoom, no sideways panning. Every text box uses 16px+ text so iPhones don't auto-zoom when it's tapped.
 
 ## 5. Stock screen
@@ -235,6 +236,7 @@ The code is `index.html` in the `hititautosport/Race-inventory` GitHub repo; thi
 
 ## 11. Changelog
 
+- **2026-10-19** — Fixed iPhone layout: no dead space above the header, nothing scrolls behind it, smaller gap under Enter.
 - **2026-10-19** — v2.3: fixed lost counts on brand-new items (saves now go in order); status dot hidden unless saving or failed; Export moved into a new Menu under your initials with Reports, Theme, part-list setting, users, password, sign out and version. 56/56 checks passed.
 - **2026-10-19** — New red/white/black theme (red replaces yellow everywhere), new "Fast bins" logo for the home screen, browser tab and header, slanted two-tone title. 54/54 test checks passed.
 - **2026-10-19** — Added Scan button (camera), Move between locations, batch label PDFs (label printer or Avery 5163 sheets), who-made-it initials and names in Excel exports (not shown in the app), readable dates in exports, and a twice-weekly keep-awake job so the free database never pauses. 54/54 test checks passed.
