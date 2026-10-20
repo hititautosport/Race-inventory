@@ -22,12 +22,14 @@ An inventory system for an ARCA race team bought with 15 chassis, 7 engines, 2 c
 | **App address** | https://hititautosport.github.io/Race-inventory/ (GitHub Pages) |
 | **Code** | GitHub repo `hititautosport/Race-inventory` — one file, `index.html` (HTML + CSS + vanilla JS). Pushing to `main` updates the live app in about a minute |
 | **Database** | Supabase org "18", project **Race Inventory** (ref `osbjpkhxerztakdqdyql`, region us-west-2, Free plan). URL `https://osbjpkhxerztakdqdyql.supabase.co` |
-| **Libraries** | `@supabase/supabase-js@2.45.4` (jsDelivr UMD), `qrcodejs 1.0.0` (cdnjs), Google Fonts: Barlow Condensed, IBM Plex Sans, IBM Plex Mono |
+| **Libraries** | `@supabase/supabase-js@2.45.4` (jsDelivr UMD), `qrcodejs 1.0.0` (cdnjs, makes QR codes), `jsqr 1.4.0` (jsDelivr, reads QR codes from the camera), `jspdf 2.5.1` (cdnjs, label PDFs), Google Fonts: Barlow Condensed, IBM Plex Sans, IBM Plex Mono |
+| **Key** | The page uses the project's public **anon** key (works with every supabase-js version). It can't read data without a signed-in user |
+| **Keep-awake** | GitHub Action `.github/workflows/keep-awake.yml` pings the database and the users service Mondays and Thursdays so the free plan never pauses. Run it by hand from the repo's Actions tab. GitHub turns off scheduled jobs if the repo has no commits for 60 days; if that happens, re-enable it in the Actions tab |
 | **Logins** | Supabase Auth, email + password. No public sign-up screen: the Master admin adds people from the Users screen |
 | **User management** | Edge Function `manage-users` (first-admin setup, list, add, change level, reset password, remove) |
 | **Photos** | Private Storage bucket `photos` (5 MB max, jpeg/png/webp). Compressed in the browser to max 1280 px, JPEG 0.7. Shown with 1-hour signed links |
 | **Live updates** | Supabase Realtime on all inventory tables, so counts from one phone show up on the others |
-| **Export** | CSV stock totals and full count log. On iPhone, files and labels open the Share sheet (Save to Files, Print, AirDrop) |
+| **Export** | CSV (opens in Excel). **Stock totals:** one row per item, a column per location, total, last entry date and who made it (initials). **Full log:** every entry with date/time, type (Count, Move), quantity, location, bin, note, and who made it (initials + name). Who-made-it is only in the exports, not shown in the app. On iPhone, files open the Share sheet (Save to Files, Print, AirDrop) |
 | **Old v1** | Claude artifact https://claude.ai/artifact/7veNwWLonVmRKc2qwzbL7L — retired; its data was copied to Supabase on 2026-10-19 |
 
 Free plan notes: the project pauses after 7 days with no use (data is kept; unpause it on supabase.com), 500 MB database, 1 GB photos, no automatic backups, so export a CSV weekly.
@@ -127,7 +129,7 @@ Speed is the top requirement. Any change must keep these behaviors:
 8. **Category, Location and Bin stay set** between entries (you count one shelf at a time).
 9. Location defaults to **Shop**.
 10. Same item counted twice (e.g. two bins) adds up; it never overwrites.
-11. "Just counted" list shows the last 8 entries with Undo.
+11. "Just counted" list shows the last 8 **count** entries with Undo (moves don't show there).
 12. Pickers have **Edit list** to rename and delete. Delete always works: first tap shows exactly what else goes with it (e.g. "Also removes 1 stock item, 3 count entries"), second tap confirms. Deleting a category removes its parts, sizes, stock and entries; deleting a part removes its sizes, stock and entries; deleting a size removes the stock items with that size. Locations that still hold stock can't be deleted (says why), and the last location can't be deleted.
 13. Status in the header shows "All saved" / "Saving…" / "Some saves failed" with Retry.
 14. Pickers have a gold outline and a dark blurred background so they stand out from the page.
@@ -135,8 +137,10 @@ Speed is the top requirement. Any change must keep these behaviors:
 
 ## 5. Stock screen
 
+- **Scan** (yellow button in the header, every user level): opens the camera, reads a QR label and jumps to that item. Also has a box to type a code. Closing it turns the camera off. iPhone asks for camera permission the first time.
+- **Labels** button: makes one PDF of QR labels for exactly the items currently showing (search or filter first, e.g. "Suspension" or "Rack B"). Two formats: **Label printer** (one 3.5 × 1.5 in label per page) or **Letter sheets** (Avery 5163/8163, 2 × 4 in, 10 per page). The choice is remembered.
 - Grouped by category, searchable by part, size, code or bin, filterable by location.
-- Tap an item: code, QR, qty per location, photo, home bin (editable), full history with delete, **Count more**, **Save QR label** (PNG, 1050×450, sized for 3.5×1.5 in labels), **Delete item** (two taps; removes the item and its entries from inventory, keeps the part name in the list).
+- Tap an item: code, QR, qty per location, photo, home bin (editable), full history with delete, **Count more**, **Move** (Editor+: from/to location with on-hand counts, how many, blocks moving more than is there; saved as two linked `transfer` rows, −qty at From and +qty at To, sharing a `transfer_id`; Undo or deleting either row removes both), **Save QR label** (PNG, 1050×450, sized for 3.5×1.5 in labels), **Delete item** (two taps; removes the item and its entries from inventory, keeps the part name in the list).
 - **Export:** stock totals CSV (one row per item, a column per location) and full count log CSV.
 
 ## 6. QR / label rules
@@ -153,10 +157,11 @@ Speed is the top requirement. Any change must keep these behaviors:
 ### Phase 2 — Move to Supabase ✅ done 2026-10-19
 Supabase project, user levels, live updates, photos in Storage, hosted on GitHub Pages, v1 data copied (17 categories, 4 parts, 1 size, 3 items, 2 locations; there were no count entries yet).
 
-### Phase 3 — Scan check-out / check-in
-- Camera QR scanning (works in a Supabase-hosted web app; the Claude artifact can't use the camera).
-- Check-out = move of type `transfer` written as two rows sharing a `transfer_id`: −qty at Shop, +qty at Hauler.
+### Phase 3 — Scan check-out / check-in (partly done)
+- ✅ Camera QR scanning opens the item. ✅ Move between locations (`transfer` rows).
+- Next: scan-to-load mode (scan bins one after another, each adds to a load list, one tap moves them all Shop → Hauler).
 - After a race: scan back in, or mark `used` / `damaged` (negative move at Hauler). Used/damaged builds a restock list.
+- Optional: low-stock minimum per item with a Low tag and "Low only" filter (reorder list).
 
 ### Phase 4 — Track kits
 - `kits` (name, track_id, is_base) and `kit_lines` (kit_id, item_id, qty).
@@ -191,6 +196,7 @@ create table public.moves  (id text pk, item_id -> items cascade, qty int, type 
 create view public.stock with (security_invoker) as select item_id, location_id, sum(qty) qty from moves group by 1,2;
 
 -- RLS on every table: select can_read(); insert/update can_edit(); delete is_admin() (moves: can_edit())
+-- team_names(): id + name of every profile, only for viewer+; used for the "By" columns in exports
 -- storage bucket 'photos' (private): read can_read(), upload can_edit(), delete is_admin()
 -- realtime publication: locations, categories, parts, sizes, items, moves
 ```
@@ -201,7 +207,7 @@ Phase 4 tables still to add: `tracks (id, name, track_type)`, `kits (id, name, t
 
 ## 9. Testing
 
-After every change, run a full tap-through test on a phone-sized touch screen with a stand-in for Supabase that enforces the same permission rules: first-admin setup, sign in (wrong and right password), every picker, Add new, Edit list rename/delete, number pad keys (fast double taps, Back, Clear, Close, tap-outside), +/−, bin, note, photo, Enter, both Undos, Stock search and filters, item sheet (QR link, bin, label, Count more, history delete, Delete item), Export, Users screen (add, duplicate email, change level, last-admin guard, reset password, remove), change own password, sign out, View only and Editor restrictions, No access screen, opening a QR link, light and dark theme, no sideways scrolling, no script errors. The 2026-10-19 v2 run passed 48/48 checks.
+After every change, run a full tap-through test on a phone-sized touch screen with a stand-in for Supabase that enforces the same permission rules: first-admin setup, sign in (wrong and right password), every picker, Add new, Edit list rename/delete, number pad keys (fast double taps, Back, Clear, Close, tap-outside), +/−, bin, note, photo, Enter, both Undos, Stock search and filters, item sheet (QR link, bin, label, Count more, history delete, Delete item), Export, Users screen (add, duplicate email, change level, last-admin guard, reset password, remove), change own password, sign out, View only and Editor restrictions, No access screen, opening a QR link, light and dark theme, no sideways scrolling, no script errors. Also: Scan (camera finds a label, unknown code, typed code, camera stops on Close), Move (over-limit blocked, both rows written and linked, Undo and history delete remove both, not in Just counted), label PDFs in both formats for exactly what Stock shows, export columns for who and when. The latest run passed 54/54 checks.
 
 ## 10. How to continue in a new chat
 
@@ -215,6 +221,7 @@ The code is `index.html` in the `hititautosport/Race-inventory` GitHub repo; thi
 
 ## 11. Changelog
 
+- **2026-10-19** — Added Scan button (camera), Move between locations, batch label PDFs (label printer or Avery 5163 sheets), who-made-it initials and names in Excel exports (not shown in the app), readable dates in exports, and a twice-weekly keep-awake job so the free database never pauses. 54/54 test checks passed.
 - **2026-10-19** — Removed the "Chassis · Engines · Spares" subtitle under the title.
 - **2026-10-19** — v2: standalone app on GitHub Pages + Supabase. Email/password logins, user levels (No access, View only, Editor, Master admin) enforced in the database, Users screen, change own password, live updates between phones, photos in private Storage, QR codes are links that open the item, iPhone Share sheet for exports/labels. v1 data copied over. 48/48 test checks passed.
 - **2026-10-19** — Delete now works on anything in use (with a confirm that lists what goes with it); Delete item added to the item sheet; quick taps on two different spots no longer get swallowed; full 36-check button test passed.
