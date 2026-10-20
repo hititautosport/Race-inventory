@@ -132,10 +132,10 @@ Speed is the top requirement. Any change must keep these behaviors:
 5. Picking a category opens the part picker. Picking a part opens the size picker if that part has sizes or was just added; otherwise it jumps to quantity.
 6. Quantity uses the app's **own number pad** (1–9, 0, Clear, Back) that sits right above the Enter button. The top row of the pad shows the part being counted (left), the quantity being typed (center, large, red outline) and **Close** (right). Keys act on press for instant response. The phone keyboard never opens for quantity, so it can't cover Enter. It appears after a part/size is picked or when the quantity box is tapped. Desktop keyboards can type digits and press Enter. The pad has a **Close** button at the top, and tapping anywhere else on the page also closes it.
 7. **ENTER** is a big button pinned to the bottom. It saves in the background, shows a toast with **Undo**, clears Part/Size/Quantity/Note/Photo, and reopens the part picker.
-8. **Category, Location and Bin stay set** between entries (you count one shelf at a time).
+8. **Category, Location and Bin stay set** between entries (you count one shelf at a time). Location and Bin / shelf sit at the **bottom** of the Count screen, under Photo and Note.
 9. Location defaults to **Shop**.
 10. Same item counted twice (e.g. two bins) adds up; it never overwrites.
-11. "Just counted" list shows the last 8 **count** entries with Undo (moves don't show there).
+11. The Count screen has no history list. **Recent entries** (Menu → Counting) shows the last 25 **count** entries with time and Undo (moves don't show there). The toast after Enter also has Undo.
 12. Pickers have **Edit list** to rename and delete. Delete always works: first tap shows exactly what else goes with it (e.g. "Also removes 1 stock item, 3 count entries"), second tap confirms. Deleting a category removes its parts, sizes, stock and entries; deleting a part removes its sizes, stock and entries; deleting a size removes the stock items with that size. Locations that still hold stock can't be deleted (says why), and the last location can't be deleted.
 13. Save status in the header is **hidden when everything is saved**. A small grey blinking dot shows while saving. A red **Not saved** pill appears only if a save failed (tap it for help; the error message has Retry).
 16. **Saves go out one at a time, in order.** A new part/item always reaches the database before the count that points at it. (Before 2026-10-19 21:10 a new item and its first count were sent together and the count could arrive first and be rejected by the database's link check.)
@@ -153,6 +153,7 @@ Speed is the top requirement. Any change must keep these behaviors:
 
 ## 5a. Menu (tap your initials, top right)
 
+- **Counting** (Editor+): Recent entries (last 25 counts with Undo; has a Menu button to go back).
 - **Reports:** Stock totals (Excel), Full log (Excel), Print QR labels (opens Labels for whatever Stock is showing).
 - **Settings on this phone:** Theme (Auto / Light / Dark), "Open the part list after Enter" (on by default; Editors+ only). Saved per phone.
 - **Team** (Master admin): Manage users.
@@ -222,7 +223,7 @@ Phase 4 tables still to add: `tracks (id, name, track_type)`, `kits (id, name, t
 
 ## 9. Testing
 
-After every change, run a full tap-through test on a phone-sized touch screen with a stand-in for Supabase that enforces the same permission rules: first-admin setup, sign in (wrong and right password), every picker, Add new, Edit list rename/delete, number pad keys (fast double taps, Back, Clear, Close, tap-outside), +/−, bin, note, photo, Enter, both Undos, Stock search and filters, item sheet (QR link, bin, label, Count more, history delete, Delete item), Export, Users screen (add, duplicate email, change level, last-admin guard, reset password, remove), change own password, sign out, View only and Editor restrictions, No access screen, opening a QR link, light and dark theme, no sideways scrolling, no script errors. Also: Scan (camera finds a label, unknown code, typed code, camera stops on Close), Move (over-limit blocked, both rows written and linked, Undo and history delete remove both, not in Just counted), label PDFs in both formats for exactly what Stock shows, export columns for who and when. Also: saves arrive in order (the stand-in database enforces the same links between tables and answers in random order like a phone connection), status hidden when saved, Menu reports/theme/setting. The latest run passed 56/56 checks. Proven: the version before this fix lost 5 of 6 rapid new-item counts in the same test; the fixed version saved 6 of 6.
+After every change, run a full tap-through test on a phone-sized touch screen with a stand-in for Supabase that enforces the same permission rules: first-admin setup, sign in (wrong and right password), every picker, Add new, Edit list rename/delete, number pad keys (fast double taps, Back, Clear, Close, tap-outside), +/−, bin, note, photo, Enter, both Undos, Stock search and filters, item sheet (QR link, bin, label, Count more, history delete, Delete item), Export, Users screen (add, duplicate email, change level, last-admin guard, reset password, remove), change own password, sign out, View only and Editor restrictions, No access screen, opening a QR link, light and dark theme, no sideways scrolling, no script errors. Also: Scan (camera finds a label, unknown code, typed code, camera stops on Close), Move (over-limit blocked, both rows written and linked, Undo and history delete remove both, not in Just counted), label PDFs in both formats for exactly what Stock shows, export columns for who and when. Also: saves arrive in order (the stand-in database enforces the same links between tables and answers in random order like a phone connection), status hidden when saved, Menu reports/theme/setting. The latest run passed 57/57 checks. Proven: the version before this fix lost 5 of 6 rapid new-item counts in the same test; the fixed version saved 6 of 6.
 
 ## 10. How to continue in a new chat
 
@@ -236,6 +237,7 @@ The code is `index.html` in the `hititautosport/Race-inventory` GitHub repo; thi
 
 ## 11. Changelog
 
+- **2026-10-19** — Count screen simplified: Just counted list moved to Menu → Recent entries (last 25, with Undo); Location and Bin / shelf moved to the bottom. 57/57 checks passed.
 - **2026-10-19** — Fixed iPhone layout: no dead space above the header, nothing scrolls behind it, smaller gap under Enter.
 - **2026-10-19** — v2.3: fixed lost counts on brand-new items (saves now go in order); status dot hidden unless saving or failed; Export moved into a new Menu under your initials with Reports, Theme, part-list setting, users, password, sign out and version. 56/56 checks passed.
 - **2026-10-19** — New red/white/black theme (red replaces yellow everywhere), new "Fast bins" logo for the home screen, browser tab and header, slanted two-tone title. 54/54 test checks passed.

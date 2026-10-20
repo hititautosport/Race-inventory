@@ -114,7 +114,7 @@ main{padding-block:14px 120px}
 .banner{border:1px solid var(--bad);color:var(--bad);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:14px}
 
 /* context strip */
-.ctx{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.ctx{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
 .chip{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border:1px dashed var(--line);background:transparent;border-radius:10px;padding:8px 10px;text-align:left;min-width:0}
 .chip span{font:600 10.5px/1 var(--f-body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .chip strong{font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
@@ -317,11 +317,6 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
   <div class="banner" id="nodb" hidden>No signal. Entries won't save until you're back online.</div>
 
   <section id="v-count">
-    <div class="ctx">
-      <button class="chip" id="ctx-loc" type="button"><span>Location</span><strong id="loc-v">Shop</strong></button>
-      <label class="chip" for="bin"><span>Bin / shelf</span><input id="bin" placeholder="e.g. Rack B, drawer 3" autocomplete="off" enterkeyhint="done"></label>
-    </div>
-
     <div class="form">
       <button class="field" id="f-cat" type="button"><span class="lbl">Category</span><span class="val ph" id="cat-v">Choose or add</span><span class="chev">›</span></button>
       <button class="field" id="f-part" type="button"><span class="lbl">Part</span><span class="val ph" id="part-v">Choose or add</span><span class="chev">›</span></button>
@@ -342,9 +337,10 @@ h2{font:700 18px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercas
       <div class="thumb" id="thumb" hidden><img id="thumb-img" alt="Photo for this entry"><span id="thumb-s" style="font-size:13px;color:var(--muted)"></span><button class="x" id="thumb-x" type="button">Remove</button></div>
       <input class="notein" id="note" placeholder="Note (condition, serial, etc.)" hidden autocomplete="off" enterkeyhint="done">
     </div>
-
-    <h2>Just counted</h2>
-    <div class="list" id="recent"></div>
+    <div class="ctx">
+      <button class="chip" id="ctx-loc" type="button"><span>Location</span><strong id="loc-v">Shop</strong></button>
+      <label class="chip" for="bin"><span>Bin / shelf</span><input id="bin" placeholder="e.g. Rack B, drawer 3" autocomplete="off" enterkeyhint="done"></label>
+    </div>
   </section>
 
   <section id="v-stock" hidden>
@@ -491,17 +487,18 @@ function renderForm(){
 }
 function setVal(sel, v, ph){ const el = $(sel); el.textContent = v || ph; el.classList.toggle("ph", !v); }
 
+// Recent entries live in the Menu now; this fills that list while it's open
 function renderRecent(){
-  const el = $("#recent");
-  const ms = S.moves.filter(m => !m.type || m.type === "count").sort((a,b) => (b.ts||0) - (a.ts||0)).slice(0, 8);
+  const el = $("#recent"); if (!el) return;
+  const ms = S.moves.filter(m => !m.type || m.type === "count").sort((a,b) => (b.ts||0) - (a.ts||0)).slice(0, 25);
   if (!ms.length){
-    el.innerHTML = `<div class="empty"><strong>Nothing counted yet</strong>Pick a category and part, type the quantity, and press Enter. Each entry shows up here so you can undo it.</div>`;
+    el.innerHTML = `<div class="empty"><strong>Nothing counted yet</strong>Counts you enter on the Count tab show up here so you can undo them.</div>`;
     return;
   }
   el.innerHTML = ms.map(m => {
     const it = find(S.items, m.item_id);
     const title = it ? itemTitle(it) : "…";
-    return `<div class="row"><div><div class="t">${esc(m.qty)} × ${esc(title)}</div><div class="m">${it ? `<span class="code">${esc(it.code)}</span>` : ""}<span>${esc(locName(m.location_id))}${m.bin ? " · " + esc(m.bin) : ""}</span>${m._pending ? '<span class="pend">saving</span>' : ""}</div></div><button class="undo" data-undo="${esc(m.id)}" type="button">Undo</button></div>`;
+    return `<div class="row"><div><div class="t">${esc(m.qty)} × ${esc(title)}</div><div class="m">${it ? `<span class="code">${esc(it.code)}</span>` : ""}<span>${esc(locName(m.location_id))}${m.bin ? " · " + esc(m.bin) : ""}</span><span>${esc(new Date(m.ts || m.at).toLocaleString([], { month:"short", day:"numeric", hour:"numeric", minute:"2-digit" }))}</span>${m._pending ? '<span class="pend">saving</span>' : ""}</div></div><button class="undo" data-undo="${esc(m.id)}" type="button">Undo</button></div>`;
   }).join("");
 }
 
@@ -1107,7 +1104,7 @@ $("#note").onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); $("#n
 $("#b-photo").onclick = () => $("#photo-in").click();
 $("#photo-in").onchange = e => onPhoto(e.target.files[0]);
 $("#thumb-x").onclick = () => { clearPhoto(); renderForm(); };
-$("#recent").addEventListener("click", e => { const b = e.target.closest("[data-undo]"); if (b) { undoMove(b.dataset.undo); toast("Entry removed"); } });
+document.addEventListener("click", e => { const b = e.target.closest && e.target.closest("#recent [data-undo]"); if (b) { undoMove(b.dataset.undo); toast("Entry removed"); } });
 $("#stock").addEventListener("click", e => { const b = e.target.closest("[data-item]"); if (b) openItem(b.dataset.item); });
 $("#locf").addEventListener("click", e => { const b = e.target.closest("[data-lf]"); if (b) { S.locFilter = b.dataset.lf; renderStock(); } });
 $("#q").oninput = () => { S.q = $("#q").value; renderStock(); };
@@ -1270,6 +1267,9 @@ function openAccount(){
   sc.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="ac-t">
     <div class="sh-hd"><h3 id="ac-t">${esc(me.full_name || "Menu")}<small>${esc(me.email || "")} · ${esc(LEVELS[S.role] || "")}</small></h3><button class="iconbtn" id="ac-x" type="button">Close</button></div>
     <div class="det">
+      <div class="mgroup need-edit"><h4>Counting</h4>
+        <button class="mitem" id="mn-recent" type="button"><span>Recent entries<small>Your latest counts, with Undo</small></span>${chev}</button>
+      </div>
       <div class="mgroup"><h4>Reports</h4>
         <button class="mitem" id="ex-stock" type="button"><span>Stock totals<small>Excel: every item, count per location, last entry and who</small></span>${chev}</button>
         <button class="mitem" id="ex-log" type="button"><span>Full log<small>Excel: every count and move, with date, time and who</small></span>${chev}</button>
@@ -1289,6 +1289,7 @@ function openAccount(){
       <div class="ver">Race Shop Inventory ${APP_VERSION}</div>
     </div></div>`;
   $("#ac-x").onclick = closePicker;
+  $("#mn-recent").onclick = openRecent;
   $("#ex-stock").onclick = () => exportCsv("stock");
   $("#ex-log").onclick = () => exportCsv("log");
   $("#mn-labels").onclick = () => { closePicker(); setTab("stock"); renderStock(); openLabels(); };
@@ -1307,6 +1308,15 @@ function openAccount(){
     closePicker(); toast("Password changed");
   };
   $("#ac-out").onclick = async () => { await sb.auth.signOut(); location.reload(); };
+}
+function openRecent(){
+  const sc = $("#scrim"); sc.hidden = false;
+  sc.innerHTML = `<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="rc-t">
+    <div class="sh-hd"><h3 id="rc-t">Recent entries<small>Last 25 counts · Undo removes one</small></h3><button class="iconbtn" id="rc-back" type="button">Menu</button><button class="iconbtn" id="rc-x" type="button">Close</button></div>
+    <div class="det" style="padding-top:12px"><div class="list" id="recent"></div></div></div>`;
+  $("#rc-x").onclick = closePicker;
+  $("#rc-back").onclick = openAccount;
+  renderRecent();
 }
 $("#sync").onclick = () => { if (S.failed > 0) toast("Some changes didn't save. Check your signal, then tap Retry on the message that appears, or reload.", "Reload", () => location.reload(), true); };
 
