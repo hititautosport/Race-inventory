@@ -161,10 +161,10 @@ body.kp main{padding-bottom:420px}
 
 /* enter bar */
 .enterbar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding-top:10px;padding-bottom:max(10px, calc(env(safe-area-inset-bottom,0px) - 12px))}
-.entrow{display:grid;grid-template-columns:84px 1fr;gap:10px}
-.camgo{height:60px;border-radius:12px;border:2px solid var(--accent);background:var(--surface);color:var(--accent);display:grid;place-items:center;align-content:center;gap:2px;font:700 12px/1 var(--f-body);letter-spacing:.06em;text-transform:uppercase}
-.camgo svg{width:28px;height:28px}
-.camgo:disabled{border-color:var(--line);color:var(--muted);background:var(--sunk)}
+.entrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.camgo{height:60px;border-radius:12px;border:2px solid #000;background:var(--accent);color:#000;display:grid;place-items:center;align-content:center;gap:3px;font:700 12px/1 var(--f-body);letter-spacing:.06em;text-transform:uppercase;box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.camgo svg{width:30px;height:30px}
+.camgo:disabled{border-color:var(--line);color:var(--muted);background:var(--sunk);box-shadow:none}
 .camgo.busy svg{animation:blink 1s ease-in-out infinite}
 .enter{width:100%;height:60px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-ink);font:700 26px/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;box-shadow:0 2px 0 rgba(0,0,0,.25)}
 .enter:disabled{background:var(--sunk);color:var(--muted);box-shadow:none;cursor:not-allowed}
@@ -405,8 +405,8 @@ body.qe main{padding-bottom:110px}
     <button type="button" data-k="clear" class="fn">Clear</button><button type="button" data-k="0">0</button><button type="button" data-k="back" class="fn" aria-label="Backspace">⌫ Back</button>
   </div>
   <div class="entrow">
-    <button class="camgo" id="cam-go" type="button" disabled aria-label="Take a photo and save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>Photo</span></button>
     <button class="enter" id="enter" type="button" disabled>Enter<small id="enter-s">Pick a category and part</small></button>
+    <button class="camgo" id="cam-go" type="button" disabled aria-label="Take a photo and save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><span>With photo</span></button>
   </div></div></div>
 
 <div class="scrim" id="scrim" hidden></div>
@@ -530,7 +530,7 @@ function renderForm(){
   btn.disabled = !!why;
   const cam = $("#cam-go");
   if (cam) { cam.hidden = !S.assets; cam.disabled = !!why; cam.classList.toggle("busy", !!(S.photo && S.photo.uploading)); }
-  s.textContent = why || `${qtyVal()} × ${p?.name || ""}${z ? " " + z.name : ""} → ${locName(S.sel.loc)}`;
+  s.textContent = why || "without photo";
 }
 function setVal(sel, v, ph){ const el = $(sel); el.textContent = v || ph; el.classList.toggle("ph", !v); }
 

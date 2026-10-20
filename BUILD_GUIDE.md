@@ -131,7 +131,7 @@ Speed is the top requirement. Any change must keep these behaviors:
 4. Lists start empty (except categories and locations).
 5. Picking a category opens the part picker. Picking a part opens the size picker if that part has sizes or was just added; otherwise it jumps to quantity.
 6. Quantity uses the app's **own number pad** (1–9, 0, Clear, Back) that sits right above the Enter button. The top row of the pad shows the part being counted (left), the quantity being typed (center, large, red outline) and **Close** (right). Keys act on press for instant response. The phone keyboard never opens for quantity, so it can't cover Enter. It appears after a part/size is picked or when the quantity box is tapped. Desktop keyboards can type digits and press Enter. The pad has a **Close** button at the top, and tapping anywhere else on the page also closes it.
-7. The bottom bar has a red-outlined **Photo** button on the left and **ENTER** on the right. Photo opens the camera; once the picture uploads, the entry saves with the photo attached (same as Enter). Both stay greyed out until category, part and quantity are set. Enter saves without a photo. (The small Photo button on the form still just attaches a photo without saving.) **ENTER** is a big button pinned to the bottom. It saves in the background, shows a toast with **Undo**, clears Part/Size/Quantity/Note/Photo, and reopens the part picker.
+7. The bottom bar has two same-size buttons: **ENTER / without photo** on the left and **With photo** (red with a black camera icon and black outline) on the right, where a thumb reaches one-handed. With photo opens the camera; once the picture uploads, the entry saves with the photo attached. Both stay greyed out until category, part and quantity are set. Enter saves without a photo. (The small Photo button on the form still just attaches a photo without saving.) **ENTER** is a big button pinned to the bottom. It saves in the background, shows a toast with **Undo**, clears Part/Size/Quantity/Note/Photo, and reopens the part picker.
 8. **Category, Location and Bin stay set** between entries (you count one shelf at a time). Location and Bin / shelf sit at the **bottom** of the Count screen, under Photo and Note.
 9. Location defaults to **Shop**.
 10. Same item counted twice (e.g. two bins) adds up; it never overwrites.
@@ -254,6 +254,7 @@ The code is `index.html` in the `hititautosport/Race-inventory` GitHub repo; thi
 
 ## 11. Changelog
 
+- **2026-10-19** — Bottom bar: equal-size buttons, Enter (without photo) left, red With photo right.
 - **2026-10-19** — Bottom bar: Photo button (take a picture and save) on the left, Enter on the right. 69/69 checks passed.
 - **2026-10-19** — v2.5: duplicate-part prompt, Find duplicate parts + merge, Fix item, Used/Damaged, Keep at least with Low tag/filter, Stock quick edit, bulk edit sheet export/import with preview. Count screen unchanged. 68/68 checks passed.
 - **2026-10-19** — Stock list: category headings bigger and brighter, part names smaller.
