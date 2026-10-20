@@ -215,6 +215,7 @@ The code is `index.html` in the `hititautosport/Race-inventory` GitHub repo; thi
 
 ## 11. Changelog
 
+- **2026-10-19** — Removed the "Chassis · Engines · Spares" subtitle under the title.
 - **2026-10-19** — v2: standalone app on GitHub Pages + Supabase. Email/password logins, user levels (No access, View only, Editor, Master admin) enforced in the database, Users screen, change own password, live updates between phones, photos in private Storage, QR codes are links that open the item, iPhone Share sheet for exports/labels. v1 data copied over. 48/48 test checks passed.
 - **2026-10-19** — Delete now works on anything in use (with a confirm that lists what goes with it); Delete item added to the item sheet; quick taps on two different spots no longer get swallowed; full 36-check button test passed.
 - **2026-10-19** — Quantity readout moved onto the number pad's top row; Back and Close fixed; adding a new part/size/category now auto-selects it.
